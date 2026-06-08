@@ -41,9 +41,10 @@ interface PatientRecordProps {
     address?: string;
     phone?: string;
   };
+  onBackToList?: () => void;
 }
 
-export function PatientRecord({ patient }: PatientRecordProps) {
+export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
   const [activeTab, setActiveTab] = useState('demographic');
   const [formData, setFormData] = useState<Record<string, any>>({});
 
@@ -59,7 +60,7 @@ export function PatientRecord({ patient }: PatientRecordProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PatientHeader patient={patient} />
+      <PatientHeader patient={patient} onBackToList={onBackToList} />
 
       <Tabs.Root value={activeTab} onValueChange={setActiveTab} className="flex">
         {/* Left Sidebar Navigation */}

@@ -1,17 +1,24 @@
-import { Search, Bell, User, Menu } from 'lucide-react';
+import { Search, Bell, User, Menu, ArrowLeft } from 'lucide-react';
 import gradyLogo from '../../imports/grady-logo.svg';
 
-export function Navigation() {
+interface NavigationProps {
+  onBackToList?: () => void;
+}
+
+export function Navigation({ onBackToList }: NavigationProps) {
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
+          <button
+            onClick={onBackToList}
+            className={`flex items-center gap-3 ${onBackToList ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
+          >
             <img src={gradyLogo} alt="Grady Memorial Hospital" className="h-7" />
             <div className="border-l border-gray-300 pl-3">
               <h1 className="text-base font-semibold text-gray-900">Patient Registry</h1>
             </div>
-          </div>
+          </button>
         </div>
 
         <div className="flex items-center gap-2">

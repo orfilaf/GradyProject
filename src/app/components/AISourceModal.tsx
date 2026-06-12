@@ -20,6 +20,7 @@ export function AISourceModal({ fieldName, aiData, onClose }: AISourceModalProps
   const modalRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
@@ -54,11 +55,13 @@ export function AISourceModal({ fieldName, aiData, onClose }: AISourceModalProps
       : 'text-red-700 bg-red-50 border-red-300';
 
   return (
+    // Backdrop
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
       <div
         ref={modalRef}
         className="bg-white border border-gray-200 rounded-lg shadow-2xl flex flex-col overflow-hidden w-[480px] max-w-[95vw] max-h-[80vh]"
       >
+        {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AI Sources</span>
@@ -69,6 +72,7 @@ export function AISourceModal({ fieldName, aiData, onClose }: AISourceModalProps
           </button>
         </div>
 
+        {/* Sources */}
         <div className="flex flex-col divide-y divide-gray-100 overflow-y-auto flex-shrink-0 max-h-64">
           {aiData.sources.map((source, i) => (
             <div key={i} className="px-4 py-3">
@@ -89,6 +93,7 @@ export function AISourceModal({ fieldName, aiData, onClose }: AISourceModalProps
           ))}
         </div>
 
+        {/* Chat history */}
         {messages.length > 0 && (
           <div className="flex flex-col gap-2 px-4 py-3 bg-gray-50 border-t border-gray-100 overflow-y-auto max-h-40">
             {messages.map((msg, i) => (
@@ -108,6 +113,7 @@ export function AISourceModal({ fieldName, aiData, onClose }: AISourceModalProps
           </div>
         )}
 
+        {/* Chat input */}
         <div className="flex items-center gap-2 px-3 py-2.5 border-t border-gray-200 bg-white flex-shrink-0">
           <input
             type="text"

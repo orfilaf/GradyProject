@@ -9,7 +9,7 @@ interface AIConfidenceIndicatorProps {
   confirmed: boolean;
   onConfirm: () => void;
   children: React.ReactNode;
-  isCheckboxType?: boolean;
+  isCheckboxType?: boolean; // adjusts layout for checkbox/yesno fields
 }
 
 export function AIConfidenceIndicator({
@@ -31,6 +31,7 @@ export function AIConfidenceIndicator({
   return (
     <div ref={anchorRef} className="relative w-full">
       {isCheckboxType ? (
+        // Checkbox / yesno layout: content left, AI controls right inline
         <div className="flex items-center justify-between gap-2 w-full">
           <div className="flex-1">{children}</div>
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -45,8 +46,11 @@ export function AIConfidenceIndicator({
           </div>
         </div>
       ) : (
+        // Standard field layout: AI controls in the label row
         <div className="flex flex-col w-full">
+          {/* Label row with AI controls */}
           <div className="flex items-center justify-between mb-1">
+            {/* The child already renders its own label, so we inject AI controls as an overlay */}
             <div className="flex-1 relative">
               {children}
             </div>
@@ -54,6 +58,7 @@ export function AIConfidenceIndicator({
         </div>
       )}
 
+      {/* Modal */}
       {modalOpen && (
         <AISourceModal
           fieldName={fieldName}
@@ -66,6 +71,7 @@ export function AIConfidenceIndicator({
   );
 }
 
+// The three AI controls: badge + info icon + checkmark
 interface AIBadgeControlsProps {
   confidence: number;
   confidenceBadgeClass: string;
@@ -85,9 +91,12 @@ export function AIBadgeControls({
 }: AIBadgeControlsProps) {
   return (
     <div className="flex items-center gap-1">
+      {/* Confidence score */}
       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border leading-none ${confidenceBadgeClass}`}>
         {confidence}
       </span>
+
+      {/* Source info icon */}
       <button
         type="button"
         onClick={onToggleModal}
@@ -100,6 +109,8 @@ export function AIBadgeControls({
       >
         <Info size={12} />
       </button>
+
+      {/* Confirm checkmark */}
       <button
         type="button"
         onClick={onConfirm}

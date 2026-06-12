@@ -1,17 +1,18 @@
 // Patient data fields organized by category
 // Based on patient-data-fields.csv
+// All field names standardized to Title Case for professional EMR appearance
 
 export interface FieldDefinition {
   name: string;
   type: 'text' | 'number' | 'date' | 'time' | 'datetime' | 'select' | 'textarea' | 'checkbox' | 'yesno';
   required?: boolean;
-  colSpan?: number;
-  operatorAfter?: '+' | '=' | null;
-  unit?: string;
-  options?: string[];
-  showIf?: string;
-  conditionalParent?: boolean;
-  aiEnabled?: boolean;
+  colSpan?: number; // Number of columns to span (1-4)
+  operatorAfter?: '+' | '=' | null; // Math operator to display after this field
+  unit?: string; // Unit abbreviation to display (e.g., "cm", "kg", "°C")
+  options?: string[]; // Named options for select fields
+  showIf?: string; // Name of a checkbox field — only render when that field is checked
+  conditionalParent?: boolean; // Marks a checkbox that owns conditional children; rendered in a special bottom row
+  aiEnabled?: boolean; // Show AI confidence indicator for this field
 }
 
 export interface FieldGroupColumn {
@@ -21,12 +22,12 @@ export interface FieldGroupColumn {
 
 export interface AccordionSection {
   title: string;
-  items: string[];
+  items: string[]; // checkbox labels
 }
 
 export interface VisibleWhenCondition {
-  field: string;
-  matchesAny: string[];
+  field: string;       // field name to check
+  matchesAny: string[]; // show group when field value is one of these
 }
 
 export interface FieldGroup {
@@ -36,13 +37,13 @@ export interface FieldGroup {
   gridColumns?: number;
   columns?: FieldGroupColumn[];
   accordions?: AccordionSection[];
-  visibleWhen?: VisibleWhenCondition[];
+  visibleWhen?: VisibleWhenCondition[]; // OR logic — show group if ANY condition is met
 }
 
 export interface SubTab {
   id: string;
   label: string;
-  icon?: string;
+  icon?: string; // lucide icon name
   groups: FieldGroup[];
 }
 
@@ -55,10 +56,13 @@ export interface CategoryData {
 }
 
 export const patientDataCategories: CategoryData[] = [
+  // 0. Process Improvement - Custom Layout
   {
     id: 'processimprovement',
     label: 'Process Improvement',
+    // Custom layout - will be handled separately in PatientRecord component
   },
+  // 1. Demographic Information - WITH GROUPS
   {
     id: 'demographic',
     label: 'Demographic Information',
@@ -105,11 +109,11 @@ export const patientDataCategories: CategoryData[] = [
         fields: [
           { name: 'Street 1', type: 'text', colSpan: 2 },
           { name: 'Street 2', type: 'text', colSpan: 2 },
-          { name: "Patient's Home City", type: 'text' },
-          { name: "Patient's Home County", type: 'text' },
-          { name: "Patient's Home State", type: 'text' },
-          { name: "Patient's Home Zip/Postal Code", type: 'text' },
-          { name: "Patient's Home Country", type: 'text' },
+          { name: 'Patient\'s Home City', type: 'text' },
+          { name: 'Patient\'s Home County', type: 'text' },
+          { name: 'Patient\'s Home State', type: 'text' },
+          { name: 'Patient\'s Home Zip/Postal Code', type: 'text' },
+          { name: 'Patient\'s Home Country', type: 'text' },
           { name: 'Alternate Home Residence', type: 'text', colSpan: 2 },
         ],
       },
@@ -121,6 +125,7 @@ export const patientDataCategories: CategoryData[] = [
       },
     ],
   },
+  // 2. Injury Information - WITH GROUPS
   {
     id: 'injury',
     label: 'Injury Information',
@@ -145,8 +150,8 @@ export const patientDataCategories: CategoryData[] = [
           { name: 'Vehicle Position', type: 'text' },
           { name: 'Casualty Type (# of people involved)', type: 'number', aiEnabled: true },
           { name: 'Work-Related', type: 'checkbox', conditionalParent: true, aiEnabled: true },
-          { name: "Patient's Occupation", type: 'text', showIf: 'Work-Related', aiEnabled: true },
-          { name: "Patient's Occupational Industry", type: 'text', showIf: 'Work-Related', aiEnabled: true },
+          { name: 'Patient\'s Occupation', type: 'text', showIf: 'Work-Related', aiEnabled: true },
+          { name: 'Patient\'s Occupational Industry', type: 'text', showIf: 'Work-Related', aiEnabled: true },
           { name: 'Report of Physical Abuse', type: 'checkbox', conditionalParent: true },
           { name: 'Investigation of Physical Abuse', type: 'yesno', showIf: 'Report of Physical Abuse' },
           { name: 'Caregiver at Discharge', type: 'yesno', showIf: 'Report of Physical Abuse' },
@@ -173,6 +178,7 @@ export const patientDataCategories: CategoryData[] = [
       },
     ],
   },
+  // 3. Pre-Hospital Information - WITH SUB-TABS
   {
     id: 'prehospital',
     label: 'Pre-Hospital Information',
@@ -261,11 +267,115 @@ export const patientDataCategories: CategoryData[] = [
             accordions: [
               {
                 title: 'Scene Procedures',
-                items: ['None','Airway opened or cleared','Airway-NPA','Airway-OPA','Arterial Line Maintenance','Bag Valve','Blind Insertion Airway Device','Blood Draw','Blood Glucose Analysis','Cardiac Monitor','Chest Tube','CPR-Automated Device','CPR-Manual','Cricothyrotomy-needle','Decontamination','Defibrillation','Endotracheal tube – Nasal','Endotracheal tube – Oral','Endotracheal tube route not recorded','Extrication','Intra-aortic balloon pump','Intraosseous access or infusion','Intravenous fluids','Nasogastric Tube','Needle thoracostomy – AAL placement','Needle thoracostomy – MCL placement','Needle thoracostomy – Unknown site','Pelvic binder','Physical restraint','Spinal restriction/Immobilization','Splinting','Tourniquet','Tracheostomy','Traction Splinting','Venous Access','Ventilator','Wound Care','N/A','Other','Unknown'],
+                items: [
+                  'None',
+                  'Airway opened or cleared',
+                  'Airway-NPA',
+                  'Airway-OPA',
+                  'Arterial Line Maintenance',
+                  'Bag Valve',
+                  'Blind Insertion Airway Device',
+                  'Blood Draw',
+                  'Blood Glucose Analysis',
+                  'Cardiac Monitor',
+                  'Chest Tube',
+                  'CPR-Automated Device',
+                  'CPR-Manual',
+                  'Cricothyrotomy-needle',
+                  'Decontamination',
+                  'Defibrillation',
+                  'Endotracheal tube – Nasal',
+                  'Endotracheal tube – Oral',
+                  'Endotracheal tube route not recorded',
+                  'Extrication',
+                  'Intra-aortic balloon pump',
+                  'Intraosseous access or infusion',
+                  'Intravenous fluids',
+                  'Nasogastric Tube',
+                  'Needle thoracostomy – AAL placement',
+                  'Needle thoracostomy – MCL placement',
+                  'Needle thoracostomy – Unknown site',
+                  'Pelvic binder',
+                  'Physical restraint',
+                  'Spinal restriction/Immobilization',
+                  'Splinting',
+                  'Tourniquet',
+                  'Tracheostomy',
+                  'Traction Splinting',
+                  'Venous Access',
+                  'Ventilator',
+                  'Wound Care',
+                  'N/A',
+                  'Other',
+                  'Unknown',
+                ],
               },
               {
                 title: 'Scene Medications',
-                items: ['None','Acetaminophen (Tylenol)','Albuterol (Airet, Proventil, Ventolin)','Amiodarone (Cordarone)','Antibiotics (Ampicillin, Ancef, Erythromycin, Gentamicin)','Aspirin','Atropine','Atrovent, Xopenex','Calcium Chloride','Calcium Gluconate','Crystalloid Solution','D10','D25','D50','D5 in Half Normal Saline','D5W','Diazepam (Valium)','Diltiazem (Cardizem)','Diphenhydramine (Benadryl)','Dopamine','Droperidol (Inapsine)','Epinephrine','Etomidate','Fentanyl','Furosemide','Glucagon','Haloperidol','Hydromorphone (Dilaudid)','Ibuprofen','Ketamine','Ketorolac (Toradol)','Labetalol','Lactated Ringers','Lidocaine','Lorazepam (Ativan)','Meperidine (Demerol)','Metoclopramide (Reglan)','Midazolam (Versed)','Morphine','Naloxone (Narcan)','Nitroglycerine','Norepinephrine','Normal Saline','Ondansetron (Zofran)','Oral Glucose','Oxygen','Packed Red Blood Cells – 1 unit','Packed Red Blood Cells – 2 units','Packed Red Blood Cells – 3 units','Packed Red Blood Cells – 4 units','Paralytics (Succinylcholine, Rocuronium, Vecuronium)','Plasma – 1 unit','Plasma – 2 units','Platelets','Promethazine (Phenergan)','Sodium Bicarbonate','Solumedrol','Tranexamic Acid (TXA)','Whole Blood – 1 unit','Whole Blood – 2 units','Whole Blood – 3 units','Whole Blood – 4 units (or more)'],
+                items: [
+                  'None',
+                  'Acetaminophen (Tylenol)',
+                  'Albuterol (Airet, Proventil, Ventolin)',
+                  'Amiodarone (Cordarone)',
+                  'Antibiotics (Ampicillin, Ancef, Erythromycin, Gentamicin)',
+                  'Aspirin',
+                  'Atropine',
+                  'Atrovent, Xopenex',
+                  'Calcium Chloride',
+                  'Calcium Gluconate',
+                  'Crystalloid Solution',
+                  'D10',
+                  'D25',
+                  'D50',
+                  'D5 in Half Normal Saline',
+                  'D5W',
+                  'Diazepam (Valium)',
+                  'Diltiazem (Cardizem)',
+                  'Diphenhydramine (Benadryl)',
+                  'Dopamine',
+                  'Droperidol (Inapsine)',
+                  'Epinephrine',
+                  'Etomidate',
+                  'Fentanyl',
+                  'Furosemide',
+                  'Glucagon',
+                  'Haloperidol',
+                  'Hydromorphone (Dilaudid)',
+                  'Ibuprofen',
+                  'Ketamine',
+                  'Ketorolac (Toradol)',
+                  'Labetalol',
+                  'Lactated Ringers',
+                  'Lidocaine',
+                  'Lorazepam (Ativan)',
+                  'Meperidine (Demerol)',
+                  'Metoclopramide (Reglan)',
+                  'Midazolam (Versed)',
+                  'Morphine',
+                  'Naloxone (Narcan)',
+                  'Nitroglycerine',
+                  'Norepinephrine',
+                  'Normal Saline',
+                  'Ondansetron (Zofran)',
+                  'Oral Glucose',
+                  'Oxygen',
+                  'Packed Red Blood Cells – 1 unit',
+                  'Packed Red Blood Cells – 2 units',
+                  'Packed Red Blood Cells – 3 units',
+                  'Packed Red Blood Cells – 4 units',
+                  'Paralytics (Succinylcholine, Rocuronium, Vecuronium)',
+                  'Plasma – 1 unit',
+                  'Plasma – 2 units',
+                  'Platelets',
+                  'Promethazine (Phenergan)',
+                  'Sodium Bicarbonate',
+                  'Solumedrol',
+                  'Tranexamic Acid (TXA)',
+                  'Whole Blood – 1 unit',
+                  'Whole Blood – 2 units',
+                  'Whole Blood – 3 units',
+                  'Whole Blood – 4 units (or more)',
+                ],
               },
             ],
           },
@@ -324,13 +434,45 @@ export const patientDataCategories: CategoryData[] = [
             groupName: 'Patient Transport',
             fields: [
               { name: 'IFT Inter-Facility Transfer', type: 'yesno' },
-              { name: 'IFT Other Transport Mode', type: 'select', options: ['Helicopter Ambulance','Fixed-wing Ambulance','Grady Air','Private/Public Vehicle/Walk-In','Police','Other','Not Applicable','Unknown'] },
-              { name: 'IFT Inter-Facility Transport Mode', type: 'select', options: ['Ground Ambulance','Helicopter Ambulance','Fixed-wing Ambulance','Grady Air','Private/Public Vehicle/Walk-In','Police','Other','Not Applicable','Unknown'] },
+              {
+                name: 'IFT Other Transport Mode',
+                type: 'select',
+                options: [
+                  'Helicopter Ambulance',
+                  'Fixed-wing Ambulance',
+                  'Grady Air',
+                  'Private/Public Vehicle/Walk-In',
+                  'Police',
+                  'Other',
+                  'Not Applicable',
+                  'Unknown',
+                ],
+              },
+              {
+                name: 'IFT Inter-Facility Transport Mode',
+                type: 'select',
+                options: [
+                  'Ground Ambulance',
+                  'Helicopter Ambulance',
+                  'Fixed-wing Ambulance',
+                  'Grady Air',
+                  'Private/Public Vehicle/Walk-In',
+                  'Police',
+                  'Other',
+                  'Not Applicable',
+                  'Unknown',
+                ],
+              },
             ],
           },
           {
             groupName: 'EMS',
-            visibleWhen: [{ field: 'IFT Inter-Facility Transport Mode', matchesAny: ['Ground Ambulance','Helicopter Ambulance','Fixed-wing Ambulance','Grady Air'] }],
+            visibleWhen: [
+              {
+                field: 'IFT Inter-Facility Transport Mode',
+                matchesAny: ['Ground Ambulance', 'Helicopter Ambulance', 'Fixed-wing Ambulance', 'Grady Air'],
+              },
+            ],
             fields: [
               { name: 'IFT EMS Patient Care Report UUID', type: 'text', aiEnabled: true },
               { name: 'IFT EMS Service Name', type: 'text', aiEnabled: true },
@@ -351,7 +493,12 @@ export const patientDataCategories: CategoryData[] = [
           },
           {
             groupName: 'Transport Vitals',
-            visibleWhen: [{ field: 'IFT Inter-Facility Transport Mode', matchesAny: ['Ground Ambulance','Helicopter Ambulance','Fixed-wing Ambulance','Grady Air'] }],
+            visibleWhen: [
+              {
+                field: 'IFT Inter-Facility Transport Mode',
+                matchesAny: ['Ground Ambulance', 'Helicopter Ambulance', 'Fixed-wing Ambulance', 'Grady Air'],
+              },
+            ],
             fields: [],
             columns: [
               {
@@ -367,22 +514,133 @@ export const patientDataCategories: CategoryData[] = [
               },
               {
                 columnName: 'Neurologic (GCS)',
-                fields: [{ name: 'Transport GCS Total', type: 'number', aiEnabled: true }],
+                fields: [
+                  { name: 'Transport GCS Total', type: 'number', aiEnabled: true },
+                ],
               },
             ],
           },
           {
             groupName: 'Transport Treatment',
-            visibleWhen: [{ field: 'IFT Inter-Facility Transport Mode', matchesAny: ['Ground Ambulance','Helicopter Ambulance','Fixed-wing Ambulance','Grady Air'] }],
+            visibleWhen: [
+              {
+                field: 'IFT Inter-Facility Transport Mode',
+                matchesAny: ['Ground Ambulance', 'Helicopter Ambulance', 'Fixed-wing Ambulance', 'Grady Air'],
+              },
+            ],
             fields: [],
             accordions: [
               {
                 title: 'Transport Procedures',
-                items: ['None','Airway opened or cleared','Airway-NPA','Airway-OPA','Arterial Line Maintenance','Bag Valve','Blind Insertion Airway Device','Blood Draw','Blood Glucose Analysis','Cardiac Monitor','Chest Tube','CPR-Automated Device','CPR-Manual','Cricothyrotomy-needle','Decontamination','Defibrillation','Endotracheal tube – Nasal','Endotracheal tube – Oral','Endotracheal tube route not recorded','Extrication','Intra-aortic balloon pump','Intraosseous access or infusion','Intravenous fluids','Nasogastric Tube','Needle thoracostomy – AAL placement','Needle thoracostomy – MCL placement','Needle thoracostomy – Unknown site','Pelvic binder','Physical restraint','Spinal restriction/Immobilization','Splinting','Tourniquet','Tracheostomy','Traction Splinting','Venous Access','Ventilator','Wound Care','N/A','Other','Unknown'],
+                items: [
+                  'None',
+                  'Airway opened or cleared',
+                  'Airway-NPA',
+                  'Airway-OPA',
+                  'Arterial Line Maintenance',
+                  'Bag Valve',
+                  'Blind Insertion Airway Device',
+                  'Blood Draw',
+                  'Blood Glucose Analysis',
+                  'Cardiac Monitor',
+                  'Chest Tube',
+                  'CPR-Automated Device',
+                  'CPR-Manual',
+                  'Cricothyrotomy-needle',
+                  'Decontamination',
+                  'Defibrillation',
+                  'Endotracheal tube – Nasal',
+                  'Endotracheal tube – Oral',
+                  'Endotracheal tube route not recorded',
+                  'Extrication',
+                  'Intra-aortic balloon pump',
+                  'Intraosseous access or infusion',
+                  'Intravenous fluids',
+                  'Nasogastric Tube',
+                  'Needle thoracostomy – AAL placement',
+                  'Needle thoracostomy – MCL placement',
+                  'Needle thoracostomy – Unknown site',
+                  'Pelvic binder',
+                  'Physical restraint',
+                  'Spinal restriction/Immobilization',
+                  'Splinting',
+                  'Tourniquet',
+                  'Tracheostomy',
+                  'Traction Splinting',
+                  'Venous Access',
+                  'Ventilator',
+                  'Wound Care',
+                  'N/A',
+                  'Other',
+                  'Unknown',
+                ],
               },
               {
                 title: 'Transport Medications',
-                items: ['None','Acetaminophen (Tylenol)','Albuterol (Airet, Proventil, Ventolin)','Amiodarone (Cordarone)','Antibiotics (Ampicillin, Ancef, Erythromycin, Gentamicin)','Aspirin','Atropine','Atrovent, Xopenex','Calcium Chloride','Calcium Gluconate','Crystalloid Solution','D10','D25','D50','D5 in Half Normal Saline','D5W','Diazepam (Valium)','Diltiazem (Cardizem)','Diphenhydramine (Benadryl)','Dopamine','Droperidol (Inapsine)','Epinephrine','Etomidate','Fentanyl','Furosemide','Glucagon','Haloperidol','Hydromorphone (Dilaudid)','Ibuprofen','Ketamine','Ketorolac (Toradol)','Labetalol','Lactated Ringers','Lidocaine','Lorazepam (Ativan)','Meperidine (Demerol)','Metoclopramide (Reglan)','Midazolam (Versed)','Morphine','Naloxone (Narcan)','Nitroglycerine','Norepinephrine','Normal Saline','Ondansetron (Zofran)','Oral Glucose','Oxygen','Packed Red Blood Cells – 1 unit','Packed Red Blood Cells – 2 units','Packed Red Blood Cells – 3 units','Packed Red Blood Cells – 4 units','Paralytics (Succinylcholine, Rocuronium, Vecuronium)','Plasma – 1 unit','Plasma – 2 units','Platelets','Promethazine (Phenergan)','Sodium Bicarbonate','Solumedrol','Tranexamic Acid (TXA)','Whole Blood – 1 unit','Whole Blood – 2 units','Whole Blood – 3 units','Whole Blood – 4 units (or more)'],
+                items: [
+                  'None',
+                  'Acetaminophen (Tylenol)',
+                  'Albuterol (Airet, Proventil, Ventolin)',
+                  'Amiodarone (Cordarone)',
+                  'Antibiotics (Ampicillin, Ancef, Erythromycin, Gentamicin)',
+                  'Aspirin',
+                  'Atropine',
+                  'Atrovent, Xopenex',
+                  'Calcium Chloride',
+                  'Calcium Gluconate',
+                  'Crystalloid Solution',
+                  'D10',
+                  'D25',
+                  'D50',
+                  'D5 in Half Normal Saline',
+                  'D5W',
+                  'Diazepam (Valium)',
+                  'Diltiazem (Cardizem)',
+                  'Diphenhydramine (Benadryl)',
+                  'Dopamine',
+                  'Droperidol (Inapsine)',
+                  'Epinephrine',
+                  'Etomidate',
+                  'Fentanyl',
+                  'Furosemide',
+                  'Glucagon',
+                  'Haloperidol',
+                  'Hydromorphone (Dilaudid)',
+                  'Ibuprofen',
+                  'Ketamine',
+                  'Ketorolac (Toradol)',
+                  'Labetalol',
+                  'Lactated Ringers',
+                  'Lidocaine',
+                  'Lorazepam (Ativan)',
+                  'Meperidine (Demerol)',
+                  'Metoclopramide (Reglan)',
+                  'Midazolam (Versed)',
+                  'Morphine',
+                  'Naloxone (Narcan)',
+                  'Nitroglycerine',
+                  'Norepinephrine',
+                  'Normal Saline',
+                  'Ondansetron (Zofran)',
+                  'Oral Glucose',
+                  'Oxygen',
+                  'Packed Red Blood Cells – 1 unit',
+                  'Packed Red Blood Cells – 2 units',
+                  'Packed Red Blood Cells – 3 units',
+                  'Packed Red Blood Cells – 4 units',
+                  'Paralytics (Succinylcholine, Rocuronium, Vecuronium)',
+                  'Plasma – 1 unit',
+                  'Plasma – 2 units',
+                  'Platelets',
+                  'Promethazine (Phenergan)',
+                  'Sodium Bicarbonate',
+                  'Solumedrol',
+                  'Tranexamic Acid (TXA)',
+                  'Whole Blood – 1 unit',
+                  'Whole Blood – 2 units',
+                  'Whole Blood – 3 units',
+                  'Whole Blood – 4 units (or more)',
+                ],
               },
             ],
           },
@@ -390,6 +648,7 @@ export const patientDataCategories: CategoryData[] = [
       },
     ],
   },
+  // 4. Emergency Department Information - WITH GROUPS
   {
     id: 'emergency',
     label: 'Emergency Department Information',
@@ -456,6 +715,7 @@ export const patientDataCategories: CategoryData[] = [
       },
     ],
   },
+  // 5. Hospital Procedure Information
   {
     id: 'procedures',
     label: 'Hospital Procedure Information',
@@ -466,6 +726,7 @@ export const patientDataCategories: CategoryData[] = [
       { name: 'Procedure Location Code & Description', type: 'text' },
     ],
   },
+  // 6. Pre-Existing Conditions
   {
     id: 'preexisting',
     label: 'Pre-Existing Conditions',
@@ -502,6 +763,7 @@ export const patientDataCategories: CategoryData[] = [
       { name: 'Ventilator Dependence', type: 'checkbox' },
     ],
   },
+  // 7. Diagnosis Information
   {
     id: 'diagnosis',
     label: 'Diagnosis Information',
@@ -518,6 +780,7 @@ export const patientDataCategories: CategoryData[] = [
       { name: 'TRISS', type: 'number' },
     ],
   },
+  // 8. Hospital Events
   {
     id: 'hospitalevents',
     label: 'Hospital Events',
@@ -544,6 +807,7 @@ export const patientDataCategories: CategoryData[] = [
       { name: 'Ventilator-Associated Pneumonia (VAP)', type: 'checkbox' },
     ],
   },
+  // 9. Outcome Information
   {
     id: 'outcome',
     label: 'Outcome Information',
@@ -561,6 +825,7 @@ export const patientDataCategories: CategoryData[] = [
       { name: 'Was Organ Donation Request Granted?', type: 'checkbox' },
     ],
   },
+  // 10. TQIP Measures for Processes of Care
   {
     id: 'tqip',
     label: 'TQIP Measures for Processes of Care',
@@ -587,6 +852,7 @@ export const patientDataCategories: CategoryData[] = [
       { name: 'Venous Thromboembolism Prophylaxis Type', type: 'text' },
     ],
   },
+  // 11. Practitioners
   {
     id: 'practitioners',
     label: 'Practitioners',

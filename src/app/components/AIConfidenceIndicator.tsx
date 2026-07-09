@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { Info, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Check } from 'lucide-react';
 import { AISourceModal } from './AISourceModal';
 import { AIFieldData } from '../data/aiMockData';
 
@@ -8,8 +8,9 @@ interface AIConfidenceIndicatorProps {
   aiData: AIFieldData;
   confirmed: boolean;
   onConfirm: () => void;
+  onOpenIRIS?: () => void;
   children: React.ReactNode;
-  isCheckboxType?: boolean; // adjusts layout for checkbox/yesno fields
+  isCheckboxType?: boolean;
 }
 
 export function AIConfidenceIndicator({
@@ -17,112 +18,51 @@ export function AIConfidenceIndicator({
   aiData,
   confirmed,
   onConfirm,
+  onOpenIRIS,
   children,
-  isCheckboxType = false,
 }: AIConfidenceIndicatorProps) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const anchorRef = useRef<HTMLDivElement>(null);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   const isHighConfidence = aiData.confidence >= 95;
-  const confidenceBadgeClass = isHighConfidence
-    ? 'text-green-700 bg-green-50 border-green-300'
-    : 'text-red-700 bg-red-50 border-red-300';
+  const badgeClass = isHighConfidence
+    ? 'text-white bg-green-600 border-green-700'
+    : 'text-white bg-red-600 border-red-700';
 
   return (
-    <div ref={anchorRef} className="relative w-full">
-      {isCheckboxType ? (
-        // Checkbox / yesno layout: content left, AI controls right inline
-        <div className="flex items-center justify-between gap-2 w-full">
-          <div className="flex-1">{children}</div>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <AIBadgeControls
-              confidence={aiData.confidence}
-              confidenceBadgeClass={confidenceBadgeClass}
-              confirmed={confirmed}
-              onConfirm={onConfirm}
-              onToggleModal={() => setModalOpen((v) => !v)}
-              modalOpen={modalOpen}
-            />
+    <div className="relative w-full">
+      <div className="flex items-center justify-between gap-2 w-full">
+        <div className="flex-1">{children}</div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <div
+            className="relative"
+            onMouseEnter={() => setPopupOpen(true)}
+            onMouseLeave={() => setPopupOpen(false)}
+          >
+            <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded-full border leading-none tracking-tight cursor-default select-none ${badgeClass}`}>
+              {aiData.confidence}%
+            </span>
+            {popupOpen && (
+              <AISourceModal
+                fieldName={fieldName}
+                aiData={aiData}
+                onOpenIRIS={() => { setPopupOpen(false); onOpenIRIS?.(); }}
+              />
+            )}
           </div>
+          <button
+            type="button"
+            onClick={onConfirm}
+            title={confirmed ? 'Confirmed' : 'Confirm AI suggestion'}
+            className={`flex items-center justify-center w-5 h-5 rounded transition-colors ${
+              confirmed
+                ? 'bg-green-500 text-white'
+                : 'border border-gray-300 text-gray-300 hover:border-green-500 hover:text-green-500'
+            }`}
+          >
+            <Check size={11} strokeWidth={confirmed ? 3 : 2} />
+          </button>
         </div>
-      ) : (
-        // Standard field layout: AI controls in the label row
-        <div className="flex flex-col w-full">
-          {/* Label row with AI controls */}
-          <div className="flex items-center justify-between mb-1">
-            {/* The child already renders its own label, so we inject AI controls as an overlay */}
-            <div className="flex-1 relative">
-              {children}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal */}
-      {modalOpen && (
-        <AISourceModal
-          fieldName={fieldName}
-          aiData={aiData}
-          onClose={() => setModalOpen(false)}
-          anchorRef={anchorRef}
-        />
-      )}
-    </div>
-  );
-}
-
-// The three AI controls: badge + info icon + checkmark
-interface AIBadgeControlsProps {
-  confidence: number;
-  confidenceBadgeClass: string;
-  confirmed: boolean;
-  onConfirm: () => void;
-  onToggleModal: () => void;
-  modalOpen: boolean;
-}
-
-export function AIBadgeControls({
-  confidence,
-  confidenceBadgeClass,
-  confirmed,
-  onConfirm,
-  onToggleModal,
-  modalOpen,
-}: AIBadgeControlsProps) {
-  return (
-    <div className="flex items-center gap-1">
-      {/* Confidence score */}
-      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border leading-none ${confidenceBadgeClass}`}>
-        {confidence}
-      </span>
-
-      {/* Source info icon */}
-      <button
-        type="button"
-        onClick={onToggleModal}
-        title="View AI sources"
-        className={`flex items-center justify-center w-5 h-5 rounded transition-colors ${
-          modalOpen
-            ? 'bg-primary/10 text-primary'
-            : 'text-gray-400 hover:text-primary hover:bg-primary/5'
-        }`}
-      >
-        <Info size={12} />
-      </button>
-
-      {/* Confirm checkmark */}
-      <button
-        type="button"
-        onClick={onConfirm}
-        title={confirmed ? 'Confirmed' : 'Confirm AI suggestion'}
-        className={`flex items-center justify-center w-5 h-5 rounded transition-colors ${
-          confirmed
-            ? 'bg-green-500 text-white'
-            : 'border border-gray-300 text-gray-300 hover:border-green-500 hover:text-green-500'
-        }`}
-      >
-        <Check size={11} strokeWidth={confirmed ? 3 : 2} />
-      </button>
+      </div>
     </div>
   );
 }

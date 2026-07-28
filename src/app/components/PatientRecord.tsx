@@ -584,6 +584,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
     const val = (name: string) => String(formData[categoryId]?.[name] ?? '');
     const set = (name: string, value: any) => handleFieldChange(categoryId, name, value);
 
+    // Auto-populate created timestamp on first access
     const createdTimestamp = val('_createdTimestamp') || new Date().toISOString().slice(0, 16);
     if (!val('_createdTimestamp')) {
       set('_createdTimestamp', createdTimestamp);
@@ -684,13 +685,18 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
             <div className="flex gap-3 flex-wrap items-end">
               {fld('Sex Assigned at Birth', sel('Sex Assigned at Birth', 'w-36', ['Male', 'Female', 'Unknown', 'Not Reported']))}
               {fld('Gender', sel('Gender', 'w-36', ['Male', 'Female', 'Non-binary', 'Transgender Male', 'Transgender Female', 'Other', 'Unknown']))}
-              <div className="flex items-end pb-1.5">
-                <label className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer whitespace-nowrap">
-                  <input type="checkbox" className="w-3.5 h-3.5 text-primary border-gray-300 rounded focus:ring-primary"
-                    checked={!!formData[catId]?.['Gender-Affirming Hormone Therapy']}
-                    onChange={e => handleFieldChange(catId, 'Gender-Affirming Hormone Therapy', e.target.checked)} />
-                  Gender-Affirming HRT
-                </label>
+              <div className="flex flex-col gap-0.5">
+                <label className="text-xs font-medium text-gray-700 whitespace-nowrap">Gender-Affirming HRT</label>
+                <select
+                  value={formData[catId]?.['Gender-Affirming Hormone Therapy'] ?? ''}
+                  onChange={e => handleFieldChange(catId, 'Gender-Affirming Hormone Therapy', e.target.value)}
+                  className="px-2 py-1.5 text-sm border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-36"
+                >
+                  <option value="">Select...</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="Non-disclosed">Non-disclosed</option>
+                </select>
               </div>
               {fld('Race', sel('Race', 'w-52', ['White', 'Black or African American', 'Asian', 'American Indian or Alaska Native', 'Native Hawaiian / Pacific Islander', 'Other', 'Unknown']))}
               {fld('Ethnicity', sel('Ethnicity', 'w-48', ['Hispanic or Latino', 'Not Hispanic or Latino', 'Unknown', 'Not Reported']))}
@@ -715,7 +721,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
               {fld('Country', txt("Patient's Home Country", 'w-28'))}
             </div>
             <div>
-              {fld('Alternate Home Residence', txt('Alternate Home Residence', 'w-80'))}
+              {fld('Alternate Home Residence', sel('Alternate Home Residence', 'w-56', ['Homeless', 'Undocumented Citizen', 'Migrant Worker']))}
             </div>
           </div>
         </div>
@@ -726,11 +732,14 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
   };
 
   const renderGroup = (categoryId: string, group: import('../data/patientFields').FieldGroup) => {
+    // Header select value (used for showIfValue filtering)
     const headerSelectValue: string = group.headerSelect
       ? (formData[categoryId]?.[group.headerSelect.name] ?? group.headerSelect.options[0])
       : '';
 
+    // Custom layout override — renders a fully bespoke component
     if (group.customLayout) {
+      // Title + fields all on one row
       if (group.customLayout === 'inline-header-fields') {
         return (
           <div key={group.groupName} className="bg-white rounded-lg border border-gray-200 p-3">
@@ -759,6 +768,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
         );
       }
 
+      // Arrival group: 4 admitting fields inline, rest in grid below
       if (group.customLayout === 'arrival-inline') {
         const INLINE_FIELDS = new Set(['Admitting Physician', 'Admitting Service', 'OEMST Category', 'GQIP Category']);
         const inlineFields = group.fields.filter(f => INLINE_FIELDS.has(f.name));
@@ -806,6 +816,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
         );
       }
 
+      // Compact single-row date/time fields
       if (group.customLayout === 'compact-date-row') {
         const inpCls = 'px-1.5 py-1.5 text-sm border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary bg-white';
         return (
@@ -854,6 +865,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
       }
     }
 
+    // Column layout — mini-cards with colored headers per column
     if (group.columns && group.columns.length > 0) {
       const columnStyles = [
         { header: 'bg-teal-600 text-white', card: 'border-teal-200 bg-teal-50/40' },
@@ -890,15 +902,20 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
       );
     }
 
+    // Standard flat grid layout
     let gridClass = '';
-    if (group.gridColumns === 3) gridClass = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+    if (group.gridColumns === 5) gridClass = 'grid-cols-1 md:grid-cols-3 lg:grid-cols-5';
+    else if (group.gridColumns === 4) gridClass = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
+    else if (group.gridColumns === 3) gridClass = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
     else if (group.compactLayout) gridClass = 'grid-cols-1 md:grid-cols-3 lg:grid-cols-5';
     else if (group.fields.every(f => f.type === 'checkbox')) gridClass = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
     else gridClass = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
 
+    // Filter fields: respect showIf (checkbox) and showIfValue (header select / named field)
     const visibleFields = group.fields.filter(f => {
-      if (f.showIf) return false;
+      if (f.showIf) return false; // handled separately via conditionalParents
       if (f.conditionalParent) return false;
+      if (f.showIfChecked) return false; // handled separately after accordion
       if (f.showIfValue) {
         const fieldVal = f.showIfValue.field === group.headerSelect?.name
           ? headerSelectValue
@@ -911,12 +928,21 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
     const regularFields = visibleFields;
     const conditionalParents = group.fields.filter(f => f.conditionalParent);
 
+    // Fields that appear conditionally based on accordion checkbox state
+    const accordionConditionalFields = group.fields.filter(f => {
+      if (!f.showIfChecked) return false;
+      const accordionValues: Record<string, boolean> = formData[categoryId]?.['accordion_' + f.showIfChecked.accordionKey] || {};
+      return f.showIfChecked.matchesAny.some(item => accordionValues[item]);
+    });
+
+    // Whether the header select value indicates "active" (any non-first option)
     const headerSelectActive = group.headerSelect
       ? headerSelectValue !== group.headerSelect.options[0]
       : true;
 
     return (
       <div key={group.groupName} className="bg-white rounded-lg border border-gray-200 p-3">
+        {/* Group header — with optional header select dropdown */}
         <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-gray-200">
           <h3 className="text-base font-semibold text-gray-700">{group.groupName}</h3>
           {group.headerSelect && (
@@ -932,12 +958,14 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
           )}
         </div>
 
+        {/* Conditional fields (shown when header select is not the default) */}
         {headerSelectActive && regularFields.length > 0 && (
           <div className={`grid gap-x-3 gap-y-2 ${gridClass}`}>
             {regularFields.map((field) => renderField(categoryId, field))}
           </div>
         )}
 
+        {/* Checkbox conditional parents (existing logic) */}
         {conditionalParents.length > 0 && (
           <div className={`${regularFields.length > 0 ? 'mt-2 pt-2 border-t border-gray-100' : ''} flex flex-wrap gap-6`}>
             {conditionalParents.map((parent) => {
@@ -964,6 +992,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                 key={accordion.title}
                 title={accordion.title}
                 items={accordion.items}
+                showCount={accordion.showCount !== false}
                 values={formData[categoryId]?.['accordion_' + accordion.title] || {}}
                 onChange={(item, checked) =>
                   handleFieldChange(categoryId, 'accordion_' + accordion.title, {
@@ -973,6 +1002,11 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                 }
               />
             ))}
+            {accordionConditionalFields.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-gray-100 flex flex-wrap gap-x-3 gap-y-2">
+                {accordionConditionalFields.map(f => renderField(categoryId, f))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1109,6 +1143,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                       const subTabs = category.subTabs!;
                       return (
                         <div className="flex flex-col gap-4">
+                          {/* Sub-tab navigation */}
                           <div className="flex gap-1 border-b border-gray-200">
                             {subTabs.map(st => {
                               const SubIcon = st.icon ? subTabIcons[st.icon] : null;
@@ -1123,6 +1158,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                               );
                             })}
                           </div>
+                          {/* Content */}
                           <div className="bg-white rounded-lg border border-gray-200 p-3">
                             {activeId === 'resusteam' && (
                               <PractitionerTable
@@ -1154,6 +1190,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                       </div>
                       <div className="bg-white rounded-lg border border-gray-200 p-3">
                         <h3 className="text-base font-semibold text-gray-700 mb-2 pb-1.5 border-b border-gray-200">Injury Severity</h3>
+                        {/* Summary score fields */}
                         <div className="flex flex-wrap gap-6 mb-4 pb-4 border-b border-gray-100">
                           {[
                             { label: 'Locally Calculated ISS', key: 'Locally Calculated ISS' },
@@ -1193,7 +1230,9 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                       <ProcedureTable />
                     </div>
                   ) : category.subTabs ? (
+                    // ── Sub-tab layout ───────────────────────────────────────────────────────
                     <div className="flex flex-col gap-4">
+                      {/* Sub-tab navigation */}
                       <div className="flex gap-1 border-b border-gray-200 pb-0">
                         {category.subTabs.map((subTab) => {
                           const SubIcon = subTab.icon ? subTabIcons[subTab.icon] : null;
@@ -1215,6 +1254,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                         })}
                       </div>
 
+                      {/* Active sub-tab content */}
                       {(() => {
                         const activeId = activeSubTabs[category.id] || category.subTabs![0].id;
                         const activeSubTab = category.subTabs!.find((s) => s.id === activeId);
@@ -1241,6 +1281,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                     </div>
                   ) : (
                     <>
+                      {/* Render grouped fields */}
                       {category.groups && category.groups
                         .filter((group) => {
                           if (!group.visibleWhen) return true;
@@ -1251,6 +1292,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                         .map((group) => renderGroup(category.id, group))
                       }
 
+                      {/* Render ungrouped fields */}
                       {category.fields && (
                         <div className="bg-white rounded-lg border border-gray-200 p-3">
                           <div className={`grid gap-x-3 gap-y-2 ${

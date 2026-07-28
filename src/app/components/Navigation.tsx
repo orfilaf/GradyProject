@@ -1,23 +1,47 @@
-import { Search, Bell, User, Menu, ArrowLeft } from 'lucide-react';
+import { Search, Bell, User, Menu } from 'lucide-react';
 import gradyLogo from '../../imports/grady-logo.svg';
+
+type Module = 'registry' | 'pi';
 
 interface NavigationProps {
   onBackToList?: () => void;
+  activeModule: Module;
+  onModuleSwitch: (module: Module) => void;
 }
 
-export function Navigation({ onBackToList }: NavigationProps) {
+export function Navigation({ onBackToList, activeModule, onModuleSwitch }: NavigationProps) {
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
+    <nav className="bg-white border-b border-gray-200 px-6">
+      <div className="flex items-stretch justify-between h-12">
+        <div className="flex items-stretch">
+          {/* Grady logo — back button when in patient record */}
           <button
             onClick={onBackToList}
-            className={`flex items-center gap-3 ${onBackToList ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
+            className={`flex items-center pr-5 ${onBackToList ? 'cursor-pointer hover:opacity-75 transition-opacity' : 'cursor-default'}`}
           >
             <img src={gradyLogo} alt="Grady Memorial Hospital" className="h-7" />
-            <div className="border-l border-gray-300 pl-3">
-              <h1 className="text-base font-semibold text-gray-900">Patient Registry</h1>
-            </div>
+          </button>
+
+          {/* Module tabs — sit flush against the nav bottom border */}
+          <button
+            onClick={() => onModuleSwitch('registry')}
+            className={`px-5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
+              activeModule === 'registry'
+                ? 'text-primary border-primary'
+                : 'text-gray-400 border-transparent hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Trauma Registry
+          </button>
+          <button
+            onClick={() => onModuleSwitch('pi')}
+            className={`px-5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
+              activeModule === 'pi'
+                ? 'text-amber-600 border-amber-500'
+                : 'text-gray-400 border-transparent hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Process Improvement
           </button>
         </div>
 

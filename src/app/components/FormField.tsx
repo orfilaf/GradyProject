@@ -78,7 +78,7 @@ export function FormField({ field, value, onChange, aiData, aiConfirmed, onAiCon
         return (
           <select
             id={fieldId}
-            className="w-full px-2 py-1.5 text-sm border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className={`${field.inputWidth ?? 'w-full'} px-2 py-1.5 text-sm border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
             value={value as string || ''}
             onChange={(e) => onChange?.(e.target.value)}
           >
@@ -150,7 +150,7 @@ export function FormField({ field, value, onChange, aiData, aiConfirmed, onAiCon
           <input
             type="text"
             id={fieldId}
-            className="w-full px-2 py-1.5 text-sm border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className={`${field.inputWidth ?? 'w-full'} px-2 py-1.5 text-sm border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
             value={value as string || ''}
             onChange={(e) => onChange?.(e.target.value)}
           />

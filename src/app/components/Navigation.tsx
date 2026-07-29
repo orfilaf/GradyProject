@@ -1,7 +1,7 @@
 import { Search, Bell, User, Menu } from 'lucide-react';
 import gradyLogo from '../../imports/grady-logo.svg';
 
-type Module = 'registry' | 'pi';
+export type Module = 'hub' | 'registry' | 'pi';
 
 interface NavigationProps {
   onBackToList?: () => void;
@@ -23,6 +23,16 @@ export function Navigation({ onBackToList, activeModule, onModuleSwitch }: Navig
           </button>
 
           {/* Module tabs — sit flush against the nav bottom border */}
+          <button
+            onClick={() => onModuleSwitch('hub')}
+            className={`px-5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
+              activeModule === 'hub'
+                ? 'text-indigo-600 border-indigo-500'
+                : 'text-gray-400 border-transparent hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Patient Record Hub
+          </button>
           <button
             onClick={() => onModuleSwitch('registry')}
             className={`px-5 text-sm font-semibold border-b-2 transition-colors -mb-px ${

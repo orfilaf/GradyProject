@@ -709,10 +709,6 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
         <div className={card}>
           <h3 className={hdr}>Address</h3>
           <div className="flex flex-col gap-2">
-            <div className="flex gap-3 flex-wrap">
-              {fld('Street 1', txt('Street 1', 'w-80'))}
-              {fld('Street 2', txt('Street 2', 'w-72'))}
-            </div>
             <div className="flex gap-3 flex-wrap items-end">
               {fld('City', txt("Patient's Home City", 'w-40'))}
               {fld('County', txt("Patient's Home County", 'w-32'))}
@@ -1230,7 +1226,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
                       <ProcedureTable />
                     </div>
                   ) : category.subTabs ? (
-                    // ── Sub-tab layout ───────────────────────────────────────────────────────
+                    // ── Sub-tab layout ──────────────────────────────────────
                     <div className="flex flex-col gap-4">
                       {/* Sub-tab navigation */}
                       <div className="flex gap-1 border-b border-gray-200 pb-0">

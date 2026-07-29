@@ -109,6 +109,17 @@ const categoryIcons: Record<string, any> = {
   recordhistory: Archive,
 };
 
+const EMS_COMPANIES = [
+  { name: 'Georgia EMS generic', agencyId: '2020999' },
+  { name: 'Alabama EMS generic', agencyId: '50100' },
+  { name: 'Florida EMS generic', agencyId: '51200' },
+  { name: 'Louisiana EMS generic', agencyId: '54900' },
+  { name: 'Mississippi EMS generic', agencyId: '54800' },
+  { name: 'North Carolina EMS generic', agencyId: '53700' },
+  { name: 'South Carolina EMS generic', agencyId: '54500' },
+  { name: 'Tennessee generic', agencyId: '54700' },
+];
+
 interface PatientRecordProps {
   patient: {
     mrn: string;
@@ -133,6 +144,8 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
   const [irisFieldContext, setIrisFieldContext] = useState<{ fieldName: string; sources: any[] } | undefined>(undefined);
   const [irisHistoryThread, setIrisHistoryThread] = useState<HistoryThread | undefined>(undefined);
   const [navCollapsed, setNavCollapsed] = useState(false);
+  const [emsQuery, setEmsQuery] = useState('');
+  const [emsOpen, setEmsOpen] = useState(false);
 
   const openIRISForField = (fieldName: string, data: AIFieldData) => {
     setIrisFieldContext({ fieldName, sources: data.sources });
@@ -580,7 +593,131 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
     );
   };
 
+  const renderEMSGroupContent = (categoryId: string) => {
+    const val = (name: string) => String(formData[categoryId]?.[name] ?? '');
+    const set = (name: string, value: any) => handleFieldChange(categoryId, name, value);
+
+    const query = emsQuery || val('Agency Name');
+    const matches = query.length >= 1
+      ? EMS_COMPANIES.filter(c => c.name.toLowerCase().includes(query.toLowerCase()))
+      : [];
+
+    const selectCompany = (company: { name: string; agencyId: string }) => {
+      set('Agency Name', company.name);
+      set('Agency ID', company.agencyId);
+      setEmsQuery('');
+      setEmsOpen(false);
+    };
+
+    const inp = 'px-2 py-1.5 text-sm border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary bg-white';
+    const lbl = 'text-xs font-medium text-gray-600 block mb-0.5 whitespace-nowrap';
+
+    const EMS_ROLE_OPTIONS = [
+      'Non-Transport',
+      'Transport from Scene to Facility',
+      'Transport from Scene to Rendezvous',
+      'Transport from Rendezvous to Facility',
+      'Transport to Other',
+      'Transport from Non-Scene Location',
+      'Not Applicable',
+    ];
+    const TRANSPORT_OPTIONS = [
+      'Ground Ambulance',
+      'Helicopter Ambulance',
+      'Fixed-wing Ambulance',
+      'Private/Public Vehicle/Walk-in',
+      'Police',
+      'Other',
+    ];
+
+    const selField = (label: string, name: string, options: string[], w: string) => (
+      <div className="flex flex-col">
+        <label className={lbl}>{label}</label>
+        <select className={`${inp} ${w}`} value={val(name)} onChange={e => set(name, e.target.value)}>
+          <option value="">Select...</option>
+          {options.map(o => <option key={o}>{o}</option>)}
+        </select>
+      </div>
+    );
+
+    const dtField = (label: string, name: string) => (
+      <div className="flex flex-col">
+        <label className={lbl}>{label}</label>
+        <input type="datetime-local" className={`${inp} w-[180px]`} value={val(name)} onChange={e => set(name, e.target.value)} />
+      </div>
+    );
+
+    const numField = (label: string, name: string, unit: string, w = 'w-20') => (
+      <div className="flex flex-col">
+        <label className={lbl}>{label}</label>
+        <div className="flex items-center gap-1">
+          <input type="number" className={`${inp} ${w}`} value={val(name)} onChange={e => set(name, e.target.value)} />
+          <span className="text-xs text-gray-400">{unit}</span>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="flex flex-col gap-3">
+        {/* Row 1: Agency Name (lookup) + Agency ID + EMS Role + Transport Mode */}
+        <div className="flex gap-3 flex-wrap items-end">
+          {/* Agency Name — typeahead */}
+          <div className="flex flex-col relative">
+            <label className={lbl}>Agency Name</label>
+            <input
+              className={`${inp} w-52`}
+              value={emsOpen ? emsQuery : val('Agency Name')}
+              placeholder="Type to search..."
+              onChange={e => { setEmsQuery(e.target.value); setEmsOpen(true); set('Agency Name', e.target.value); }}
+              onFocus={() => setEmsOpen(true)}
+              onBlur={() => setTimeout(() => setEmsOpen(false), 150)}
+            />
+            {emsOpen && matches.length > 0 && (
+              <div className="absolute top-full left-0 z-20 mt-1 w-72 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                {matches.map(c => (
+                  <button
+                    key={c.agencyId}
+                    onMouseDown={() => selectCompany(c)}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-primary/10 hover:text-primary flex justify-between gap-2"
+                  >
+                    <span className="font-medium">{c.name}</span>
+                    <span className="text-gray-400 flex-shrink-0">{c.agencyId}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Agency ID — auto-populated */}
+          <div className="flex flex-col">
+            <label className={lbl}>Agency ID</label>
+            <input
+              className={`${inp} w-28 bg-gray-50 text-gray-600`}
+              value={val('Agency ID')}
+              readOnly
+              placeholder="Auto-filled"
+            />
+          </div>
+
+          {selField('EMS Role', 'EMS Role', EMS_ROLE_OPTIONS, 'w-32')}
+          {selField('Transport Mode', 'Transport Mode', TRANSPORT_OPTIONS, 'w-36')}
+        </div>
+
+        {/* Row 2: date/time + lapsed fields */}
+        <div className="flex gap-3 flex-wrap items-end">
+          {dtField('EMS Dispatch', 'EMS Dispatch')}
+          {dtField('EMS Arrival at Scene', 'EMS Arrival at Scene')}
+          {dtField('EMS Departure from Scene', 'EMS Departure from Scene')}
+          {numField('Scene Time Lapsed', 'Scene Time Lapsed', 'min', 'w-32')}
+          {dtField('EMS Arrival to Hospital', 'EMS Arrival to Hospital')}
+          {numField('Transport Time Lapsed', 'Transport Time Lapsed', 'min', 'w-36')}
+        </div>
+      </div>
+    );
+  };
+
   const renderGradyAdminContent = (categoryId: string) => {
+
     const val = (name: string) => String(formData[categoryId]?.[name] ?? '');
     const set = (name: string, value: any) => handleFieldChange(categoryId, name, value);
 
@@ -846,6 +983,7 @@ export function PatientRecord({ patient, onBackToList }: PatientRecordProps) {
       }
 
       const customContent =
+        group.customLayout === 'ems-group' ? renderEMSGroupContent(categoryId) :
         group.customLayout === 'screenings' ? renderScreeningsContent(categoryId) :
         group.customLayout === 'discharge' ? renderDischargeContent(categoryId) :
         group.customLayout === 'grady-admin' ? renderGradyAdminContent(categoryId) : null;

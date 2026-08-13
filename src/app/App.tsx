@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Navigation } from './components/Navigation';
+import { Navigation, Module } from './components/Navigation';
 import { PatientRecord } from './components/PatientRecord';
 import { PatientList } from './components/PatientList';
 import { PIPatientList } from './components/PIPatientList';
 import { PIPatientRecord } from './components/PIPatientRecord';
-
-type Module = 'registry' | 'pi';
+import { HubRecord } from './components/HubRecord';
 
 export default function App() {
-  const [activeModule, setActiveModule] = useState<Module>('registry');
+  const [activeModule, setActiveModule] = useState<Module>('hub');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   const handlePatientSelect = (patient: any) => {
@@ -30,7 +29,6 @@ export default function App() {
 
   const handleModuleSwitch = (module: Module) => {
     setActiveModule(module);
-    // patient selection persists — same patient opens in the new module
   };
 
   return (
@@ -40,12 +38,18 @@ export default function App() {
         onModuleSwitch={handleModuleSwitch}
         onBackToList={selectedPatient ? handleBackToList : undefined}
       />
-      <div className="flex-1 overflow-hidden flex flex-col">
-        {activeModule === 'registry' ? (
+      <div className="flex-1 overflow-y-auto flex flex-col">
+        {activeModule === 'hub' ? (
+          selectedPatient ? (
+            <HubRecord patient={selectedPatient} onBackToList={handleBackToList} />
+          ) : (
+            <PatientList onPatientSelect={handlePatientSelect} />
+          )
+        ) : activeModule === 'registry' ? (
           selectedPatient ? (
             <PatientRecord patient={selectedPatient} onBackToList={handleBackToList} />
           ) : (
-            <PatientList onPatientSelect={handlePatientSelect} />
+            <PatientList onPatientSelect={handlePatientSelect} showDashboard />
           )
         ) : (
           selectedPatient ? (

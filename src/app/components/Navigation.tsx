@@ -47,7 +47,7 @@ export function Navigation({ onBackToList, activeModule, onModuleSwitch }: Navig
             onClick={() => onModuleSwitch('pi')}
             className={`px-5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
               activeModule === 'pi'
-                ? 'text-amber-600 border-amber-500'
+                ? 'text-teal-600 border-teal-500'
                 : 'text-gray-400 border-transparent hover:text-gray-700 hover:border-gray-300'
             }`}
           >

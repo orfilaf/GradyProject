@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown, UserCheck } from 'lucide-react';
 
-// ── Dashboard data ─────────────────────────────────────────────────────────────
+// ── Dashboard data ─────────────────────────────────────────────────────
 const DAYS_TO_CLOSE = 73;
 
 const registries = [
@@ -59,7 +59,7 @@ interface Column { key: ColKey; label: string; }
 
 const COLUMNS: Column[] = [
   { key: 'mrn', label: 'MRN' },
-  { key: 'name', label: 'Patient Name' },
+  { key: 'name', label: 'Name' },
   { key: 'traumaNumber', label: 'Trauma #' },
   { key: 'hospitalAccountNumber', label: 'Acct #' },
   { key: 'arrived', label: 'Arrived' },
@@ -84,6 +84,7 @@ const patients: Patient[] = [
 
 interface PatientListProps {
   onPatientSelect: (patient: any) => void;
+  showDashboard?: boolean;
 }
 
 function SortIcon({ col, sortCol, sortDir }: { col: ColKey; sortCol: ColKey | null; sortDir: SortDir }) {
@@ -93,7 +94,7 @@ function SortIcon({ col, sortCol, sortDir }: { col: ColKey; sortCol: ColKey | nu
     : <ChevronDown size={11} className="text-primary flex-shrink-0" />;
 }
 
-export function PatientList({ onPatientSelect }: PatientListProps) {
+export function PatientList({ onPatientSelect, showDashboard = false }: PatientListProps) {
   const [filters, setFilters] = useState<Partial<Record<ColKey, string>>>({});
   const [sortCol, setSortCol] = useState<ColKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -154,65 +155,65 @@ export function PatientList({ onPatientSelect }: PatientListProps) {
     <div className="min-h-screen bg-gray-50">
       <div className="px-6 py-6 flex flex-col gap-6">
 
-        {/* ── Row 1: Summary stats ──────────────────────────────────────── */}
-        <section>
-          <div className="grid grid-cols-3 gap-4">
-            <div className={`rounded-xl border-2 px-4 py-3 flex items-center gap-2 ${DAYS_TO_CLOSE > 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-green-200 bg-green-50 text-green-700'}`}>
-              <span className="text-2xl font-bold">{DAYS_TO_CLOSE}</span>
-              <span className="text-sm opacity-60">days avg to close</span>
-              {DAYS_TO_CLOSE > 60 && <span className="ml-auto text-lg">‼️</span>}
-              <span className="text-sm font-bold ml-auto">Days to Close</span>
+        {showDashboard && (<>
+          {/* ── Row 1: Summary stats ────────────────────────────────────── */}
+          <section>
+            <div className="grid grid-cols-3 gap-4">
+              <div className={`rounded-xl border-2 px-4 py-3 flex items-center gap-2 ${DAYS_TO_CLOSE > 60 ? 'border-red-200 bg-red-50 text-red-700' : 'border-green-200 bg-green-50 text-green-700'}`}>
+                <span className="text-2xl font-bold">{DAYS_TO_CLOSE}</span>
+                <span className="text-sm opacity-60">days avg to close</span>
+                {DAYS_TO_CLOSE > 60 && <span className="ml-auto text-lg">‼️</span>}
+                <span className="text-sm font-bold ml-auto">Days to Close</span>
+              </div>
+              <div className="rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-2 text-amber-700">
+                <span className="text-2xl font-bold">47</span>
+                <span className="text-sm opacity-60">cases active</span>
+                <span className="text-sm font-bold ml-auto">Open Cases</span>
+              </div>
+              <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-3 flex items-center gap-2 text-gray-700">
+                <span className="text-2xl font-bold">312</span>
+                <span className="text-sm opacity-60">cases closed</span>
+                <span className="text-sm font-bold ml-auto">Closed Cases YTD</span>
+              </div>
             </div>
-            <div className="rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-2 text-amber-700">
-              <span className="text-2xl font-bold">47</span>
-              <span className="text-sm opacity-60">cases active</span>
-              <span className="text-sm font-bold ml-auto">Open Cases</span>
-            </div>
-            <div className="rounded-xl border-2 border-gray-200 bg-white px-4 py-3 flex items-center gap-2 text-gray-700">
-              <span className="text-2xl font-bold">312</span>
-              <span className="text-sm opacity-60">cases closed</span>
-              <span className="text-sm font-bold ml-auto">Closed Cases YTD</span>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ── Row 2: Registries ─────────────────────────────────────────── */}
-        <section>
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Registries</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {registries.map(r => (
-              <div key={r.name} className={`rounded-xl border-2 ${r.color} flex flex-col overflow-hidden`}>
-                {/* Header: title + dates all in one row */}
-                <div className="px-4 py-3 border-b border-white/60 flex items-center gap-4 flex-wrap">
-                  <span className={`text-4xl font-black tracking-tight flex-shrink-0 ${r.labelColor}`}>{r.name}</span>
-                  <div className="flex items-center gap-4 flex-wrap">
-                    {r.recordDates && (
+          {/* ── Row 2: Registries ───────────────────────────────────────── */}
+          <section>
+            <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Registries</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {registries.map(r => (
+                <div key={r.name} className={`rounded-xl border-2 ${r.color} flex flex-col overflow-hidden`}>
+                  <div className="px-4 py-3 border-b border-white/60 flex items-center gap-4 flex-wrap">
+                    <span className={`text-4xl font-black tracking-tight flex-shrink-0 ${r.labelColor}`}>{r.name}</span>
+                    <div className="flex items-center gap-4 flex-wrap">
+                      {r.recordDates && (
+                        <div>
+                          <span className="text-[10px] text-gray-500 uppercase tracking-wide">Records</span>
+                          <p className="text-xs font-medium text-gray-700 whitespace-nowrap">{r.recordDates}</p>
+                        </div>
+                      )}
                       <div>
-                        <span className="text-[10px] text-gray-500 uppercase tracking-wide">Records</span>
-                        <p className="text-xs font-medium text-gray-700 whitespace-nowrap">{r.recordDates}</p>
+                        <span className="text-[10px] text-gray-500 uppercase tracking-wide">{r.deadlineLabel}</span>
+                        <p className="text-xs font-semibold text-gray-800 whitespace-nowrap">{r.deadline}</p>
                       </div>
-                    )}
-                    <div>
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wide">{r.deadlineLabel}</span>
-                      <p className="text-xs font-semibold text-gray-800 whitespace-nowrap">{r.deadline}</p>
+                    </div>
+                  </div>
+                  <div className="flex divide-x divide-white/60">
+                    <div className="flex-1 px-4 py-3">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Closed</p>
+                      <span className="text-3xl font-black text-gray-800">{r.closedCases}</span>
+                    </div>
+                    <div className="flex-1 px-4 py-3">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Open</p>
+                      <span className="text-3xl font-black text-gray-800">{r.openCases}</span>
                     </div>
                   </div>
                 </div>
-                {/* Stats */}
-                <div className="flex divide-x divide-white/60">
-                  <div className="flex-1 px-4 py-3">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Closed</p>
-                    <span className="text-3xl font-black text-gray-800">{r.closedCases}</span>
-                  </div>
-                  <div className="flex-1 px-4 py-3">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Open</p>
-                    <span className="text-3xl font-black text-gray-800">{r.openCases}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        </>)}
 
         {/* ── Patient Table ─────────────────────────────────────────────── */}
         <section className="flex flex-col gap-3">

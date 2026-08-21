@@ -49,6 +49,16 @@ export function computeNeurochecksStatus(data: NeurochecksData): FlagStatus {
   return 'red';
 }
 
+export interface TEGData {
+  status: FlagStatus;
+  hasResult: boolean;
+}
+
+export const TEG_DATA: Record<string, TEGData> = {
+  'MRN-2024-001234': { status: 'green', hasResult: true  }, // John Anderson — result available
+  'MRN-2024-001235': { status: 'red',   hasResult: false }, // Maria Garcia  — pending, no result
+};
+
 // Keyed by patient MRN
 export const NEUROCHECK_DATA: Record<string, NeurochecksData> = {
   'MRN-2024-001234': { ordered: 'Hourly', total: 14, losHours: 25, nonCompliant: 3 }, // John Anderson → Red

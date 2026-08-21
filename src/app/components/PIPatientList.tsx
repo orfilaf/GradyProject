@@ -1,83 +1,9 @@
 import { useState, useMemo, Fragment } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown, UserCheck, ChevronRight, Bot, Sparkles } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, UserCheck, ChevronRight, Bot, Sparkles, Search, X } from 'lucide-react';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { IRISChat } from './IRISChat';
 
-type FlagStatus = 'green' | 'amber' | 'red';
-interface GuidelinePatient { name: string; status: FlagStatus; }
-interface GuidelineBubbleData { name: string; acronym: string; patients: GuidelinePatient[]; }
-
-const STATUS_ICON: Record<FlagStatus, string> = { green: '✅', amber: '⚠️', red: '‼️' };
-
-const reviewCounts = [
-  { label: '1st Review', filterValue: 'Primary',   count: 12, color: 'bg-blue-50 border-blue-200 text-blue-700',       activeColor: 'bg-blue-100 border-blue-400 text-blue-800 ring-2 ring-blue-400' },
-  { label: '2nd Review', filterValue: 'Secondary', count: 7,  color: 'bg-amber-50 border-amber-300 text-amber-700',    activeColor: 'bg-amber-100 border-amber-500 text-amber-800 ring-2 ring-amber-400' },
-  { label: 'M&M',        filterValue: 'M&M',       count: 4,  color: 'bg-red-50 border-red-200 text-red-700',          activeColor: 'bg-red-100 border-red-400 text-red-800 ring-2 ring-red-400' },
-  { label: 'TPR',        filterValue: 'TPRC',      count: 9,  color: 'bg-emerald-50 border-emerald-200 text-emerald-700', activeColor: 'bg-emerald-100 border-emerald-400 text-emerald-800 ring-2 ring-emerald-400' },
-];
-
-const guidelinesRow1: GuidelineBubbleData[] = [
-  { name: 'Traumatic Brain Injury', acronym: 'TBI', patients: [{ name: 'John Anderson', status: 'red' }, { name: 'Maria Garcia', status: 'amber' }, { name: 'David Johnson', status: 'green' }, { name: 'Robert Williams', status: 'red' }] },
-  { name: 'Geriatric Trauma', acronym: 'Geriatric', patients: [{ name: 'Sarah Kim', status: 'amber' }, { name: 'Linda Martinez', status: 'green' }, { name: 'Harold Brown', status: 'amber' }] },
-  { name: 'Vascular Access Trauma', acronym: 'VAT', patients: [{ name: 'James Wilson', status: 'green' }, { name: 'Patricia Lee', status: 'green' }] },
-  { name: 'Acute Kidney Injury', acronym: 'AKI', patients: [{ name: 'Charles Davis', status: 'red' }, { name: 'Barbara Taylor', status: 'amber' }, { name: 'William Anderson', status: 'green' }, { name: 'Susan Thomas', status: 'amber' }, { name: 'Joseph Jackson', status: 'red' }] },
-  { name: 'Extended FAST', acronym: 'eFAST', patients: [{ name: 'Thomas White', status: 'green' }, { name: 'Jessica Harris', status: 'amber' }, { name: 'Christopher Martin', status: 'green' }] },
-];
-
-const guidelinesRow2: GuidelineBubbleData[] = [
-  { name: 'Blunt Cardiac Injury', acronym: 'Blunt Cardiac', patients: [{ name: 'Matthew Thompson', status: 'amber' }, { name: 'Amanda Garcia', status: 'green' }] },
-  { name: 'Blunt Cerebrovascular', acronym: 'Blunt Cerebro.', patients: [{ name: 'Mark Robinson', status: 'red' }, { name: 'Ashley Clark', status: 'amber' }, { name: 'Donald Lewis', status: 'green' }, { name: 'Stephanie Walker', status: 'red' }] },
-  { name: 'Pregnancy Trauma', acronym: 'Pregnancy', patients: [{ name: 'Elizabeth Hall', status: 'amber' }, { name: 'Melissa Allen', status: 'green' }] },
-  { name: 'Spinal Cord Injury', acronym: 'Spinal Cord', patients: [{ name: 'Kevin Young', status: 'red' }, { name: 'Nancy Hernandez', status: 'amber' }, { name: 'Steven King', status: 'green' }] },
-  { name: 'Resuscitative Endovascular Balloon Occlusion', acronym: 'REBOA', patients: [{ name: 'George Wright', status: 'amber' }, { name: 'Karen Lopez', status: 'green' }] },
-];
-
-function getWorstStatus(patients: GuidelinePatient[]): FlagStatus {
-  if (patients.some(p => p.status === 'red')) return 'red';
-  if (patients.some(p => p.status === 'amber')) return 'amber';
-  return 'green';
-}
-
-const KNOWN_PATIENT_NAMES = new Set(['John Anderson', 'Maria Garcia', 'David Johnson', 'Sarah Kim', 'Robert Williams']);
-
-function GuidelineBubble({ data, onPatientClick }: { data: GuidelineBubbleData; onPatientClick: (name: string) => void }) {
-  const worst = getWorstStatus(data.patients);
-  const borderCls = worst === 'red' ? 'border-red-200' : worst === 'amber' ? 'border-amber-200' : 'border-green-200';
-  const headerCls = worst === 'red' ? 'bg-red-50 border-red-100' : worst === 'amber' ? 'bg-amber-50 border-amber-100' : 'bg-green-50 border-green-100';
-  const acronymCls = worst === 'red' ? 'text-red-600' : worst === 'amber' ? 'text-amber-700' : 'text-green-700';
-  return (
-    <div className={`bg-white rounded-xl border-2 ${borderCls} flex flex-col overflow-hidden`}>
-      <div className={`${headerCls} border-b px-3 py-2.5 flex items-start justify-between gap-2`}>
-        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          <span className={`text-xs font-bold tracking-wider uppercase leading-tight ${acronymCls}`}>{data.name}</span>
-          <span className={`flex-shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full ${worst === 'red' ? 'bg-red-100 text-red-700' : worst === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>{data.patients.length}</span>
-        </div>
-        <span className="text-base flex-shrink-0 leading-none">{STATUS_ICON[worst]}</span>
-      </div>
-      <div className="flex flex-col divide-y divide-gray-50 flex-1">
-        {data.patients.map((p, i) => {
-          const isKnown = KNOWN_PATIENT_NAMES.has(p.name);
-          return (
-            <div key={i} className="flex items-center justify-between px-3 py-px hover:bg-gray-50 transition-colors">
-              {isKnown ? (
-                <button
-                  onClick={() => onPatientClick(p.name)}
-                  className="text-xs font-bold text-gray-900 truncate leading-snug hover:text-teal-700 transition-colors text-left"
-                >
-                  {p.name}
-                </button>
-              ) : (
-                <span className="text-xs text-gray-500 truncate leading-snug">{p.name}</span>
-              )}
-              <span className="text-xs flex-shrink-0 ml-2">{STATUS_ICON[p.status]}</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ── Table ─────────────────────────────────────────────────────────────────────
+// ── Table ──────────────────────────────────────────────────────────────────────────────────
 
 type ReviewStage = 'Primary' | 'Secondary' | 'M&M' | 'TPRC' | '';
 
@@ -94,8 +20,10 @@ interface Patient {
   ntdb: 'Yes' | 'No';
   piAssigned: string;
   openFlags: number;
+  guidelines: { name: string; acronym: string; status: 'red' | 'amber' | 'green' }[];
   status: 'Completed' | 'In Progress';
   review: ReviewStage;
+  // quick-review panel data
   age: number; sex: string; hospital: string; level: string;
   iss: number; triss: number; niss: number;
   admitService: string; by: string;
@@ -111,7 +39,7 @@ const REVIEW_LABEL_STYLES: Record<string, string> = {
   'TPRC':      'bg-emerald-50 border border-emerald-200 text-emerald-700',
 };
 
-type ColKey = 'mrn' | 'name' | 'traumaNumber' | 'hospitalAccountNumber' | 'arrived' | 'discharged' | 'mechanism' | 'activation' | 'piAssigned' | 'rcNurse' | 'status' | 'reviews';
+type ColKey = 'mrn' | 'name' | 'flags' | 'traumaNumber' | 'hospitalAccountNumber' | 'arrived' | 'discharged' | 'mechanism' | 'activation' | 'piAssigned' | 'rcNurse' | 'status' | 'reviews';
 type SortDir = 'asc' | 'desc';
 interface Column { key: ColKey; label: string; }
 
@@ -128,20 +56,21 @@ const COLUMNS: Column[] = [
   { key: 'piAssigned', label: 'PI Nurse' },
   { key: 'status', label: 'PI Status' },
   { key: 'reviews', label: 'Reviews' },
+  { key: 'flags', label: 'Flags' },
 ];
 
 const STAFF = ['Sarah Williams', 'Dr. Thompson', 'Michael Chen', 'Emily Rodriguez'];
 
 const patients: Patient[] = [
-  { id: '1', mrn: 'MRN-2024-001234', name: 'John Anderson',   traumaNumber: 'TN-24-0891', hospitalAccountNumber: 'HA-884421', arrived: '2024-06-07 14:30', discharged: '2024-06-10 09:15', mechanism: 'Car Accident',        activation: 'Level 4', ntdb: 'Yes', piAssigned: 'Sarah Williams', openFlags: 3, status: 'In Progress', review: 'Secondary', age: 45, sex: 'Male',   hospital: 'Mercy Hospital',   level: 'Level 4', iss: 3,  triss: 4.0, niss: 6,  admitService: 'Podiatric Surgery',  by: 'Dr. Smith',    left: 'Jun 10, 2024 09:15', los: '3d 18h 45m', rc: 'Michael Chen', pi: 'Sarah Williams', rcNurse: 'Michael Chen', caseSummary: '34-year-old male driver involved in high-speed motor vehicle accident with frontal impact, steering wheel deformation, and airbag deployment. Patient presented with severe chest pain (9/10) and respiratory distress. Initial assessment revealed seatbelt sign across chest and abdomen.\n\nImaging demonstrated multiple left-sided rib fractures (ribs 4–7) with associated pulmonary contusion and small left hemopneumothorax. No solid organ injury identified on CT scan.\n\nPatient managed with chest tube placement for hemopneumothorax with good clinical response. Discharged hospital day 5 in good condition with outpatient trauma surgery follow-up scheduled in 2 weeks.' },
-  { id: '2', mrn: 'MRN-2024-001235', name: 'Maria Garcia',    traumaNumber: 'TN-24-0892', hospitalAccountNumber: 'HA-884422', arrived: '2024-06-08 08:45', discharged: '',                mechanism: 'Fall',                activation: 'Level 3', ntdb: 'Yes', piAssigned: 'Sarah Williams', openFlags: 1, status: 'In Progress', review: 'Primary',   age: 72, sex: 'Female', hospital: 'Grady Memorial',   level: 'Level 3', iss: 9,  triss: 6.2, niss: 11, admitService: 'Orthopedic Surgery', by: 'Dr. Patel',    left: '',                    los: 'Inpatient',  rc: 'Sarah Williams', pi: 'Sarah Williams', rcNurse: 'Sarah Williams', caseSummary: '72-year-old female presenting after unwitnessed mechanical fall at home. Sustained right hip fracture and mild traumatic brain injury with brief LOC. Ground-level fall with no identified prodrome.\n\nCT head negative for intracranial hemorrhage. Pelvis X-ray confirmed right intertrochanteric fracture. Orthopedics consulted for ORIF planning.\n\nCognitive baseline limited by mild dementia. Family contact established. Fall risk protocol initiated.' },
-  { id: '3', mrn: 'MRN-2024-001236', name: 'David Johnson',   traumaNumber: 'TN-24-0893', hospitalAccountNumber: 'HA-884423', arrived: '2024-06-08 11:20', discharged: '',                mechanism: 'Gunshot Wound',       activation: 'Level 1', ntdb: 'Yes', piAssigned: 'Dr. Thompson',   openFlags: 5, status: 'In Progress', review: 'M&M',       age: 28, sex: 'Male',   hospital: 'Grady Memorial',   level: 'Level 1', iss: 25, triss: 9.1, niss: 29, admitService: 'Trauma Surgery',     by: 'Dr. Thompson', left: '',                    los: 'Inpatient',  rc: 'Dr. Thompson', pi: 'Dr. Thompson', rcNurse: 'Dr. Thompson', caseSummary: '28-year-old male presenting with penetrating gunshot wound to the left chest. Single entry wound at 4th intercostal space midclavicular line, no exit wound identified. Hemodynamically unstable on arrival.\n\nEmergent left thoracotomy performed in ED. Cardiac laceration repaired. Transferred to OR for definitive hemorrhage control. Postoperative course complicated by ventilator-associated pneumonia.\n\nCurrently in SICU, day 6 post-injury. Multiple unresolved PI flags pending review.' },
-  { id: '4', mrn: 'MRN-2024-001237', name: 'Sarah Kim',       traumaNumber: 'TN-24-0894', hospitalAccountNumber: 'HA-884424', arrived: '2024-06-07 19:30', discharged: '2024-06-09 16:45', mechanism: 'Motorcycle Accident', activation: 'Level 2', ntdb: 'No',  piAssigned: 'Dr. Thompson',   openFlags: 0, status: 'Completed',  review: 'Primary',   age: 34, sex: 'Female', hospital: 'Grady Memorial',   level: 'Level 2', iss: 6,  triss: 2.1, niss: 6,  admitService: 'General Surgery',    by: 'Dr. Lee',      left: 'Jun 9, 2024 16:45',  los: '1d 21h 15m', rc: 'Dr. Thompson', pi: 'Dr. Thompson', rcNurse: 'Dr. Thompson', caseSummary: '34-year-old female helmeted motorcyclist involved in side-impact collision. Presented with road rash and right clavicle fracture. Alert and oriented throughout.\n\nNo intracranial or intra-abdominal injuries identified on CT imaging. Orthopedics recommended conservative management for clavicle fracture. Discharged with sling and outpatient follow-up.\n\nNo open PI flags. Record marked complete.' },
-  { id: '5', mrn: 'MRN-2024-001238', name: 'Robert Williams', traumaNumber: 'TN-24-0895', hospitalAccountNumber: 'HA-884425', arrived: '2024-06-08 13:00', discharged: '',                mechanism: 'Pedestrian vs Auto',  activation: 'Level 2', ntdb: 'Yes', piAssigned: 'Sarah Williams', openFlags: 2, status: 'In Progress', review: 'TPRC',      age: 81, sex: 'Male',   hospital: 'Mercy Hospital',   level: 'Level 2', iss: 17, triss: 7.8, niss: 22, admitService: 'Trauma Surgery',     by: 'Dr. Smith',    left: '',                    los: 'Inpatient',  rc: 'Michael Chen', pi: 'Sarah Williams', rcNurse: 'Michael Chen', caseSummary: '81-year-old male struck by vehicle while crossing intersection. Sustained multiple rib fractures (bilateral), splenic laceration grade II, and right femur fracture. Anticoagulated for atrial fibrillation.\n\nSplenic laceration managed non-operatively with angioembolization. Right femur ORIF performed day 2. Anticoagulation held peri-procedure.\n\nDelirium developed day 3, managed with reorientation protocol. Prolonged ICU course. Referred to TPRC given complexity and extended LOS.' },
+  { id: '1', mrn: 'MRN-2024-001234', name: 'John Anderson',   traumaNumber: 'TN-24-0891', hospitalAccountNumber: 'HA-884421', arrived: '2024-06-07 14:30', discharged: '2024-06-10 09:15', mechanism: 'Car Accident',        activation: 'Level 4', ntdb: 'Yes', piAssigned: 'Sarah Williams', openFlags: 3, guidelines: [{ name: 'Traumatic Brain Injury', acronym: 'TBI', status: 'red' }, { name: 'Extended FAST', acronym: 'eFAST', status: 'green' }], status: 'In Progress', review: 'Secondary', age: 45, sex: 'Male',   hospital: 'Mercy Hospital',   level: 'Level 4', iss: 3,  triss: 4.0, niss: 6,  admitService: 'Podiatric Surgery',  by: 'Dr. Smith',    left: 'Jun 10, 2024 09:15', los: '3d 18h 45m', rc: 'Michael Chen', pi: 'Sarah Williams', rcNurse: 'Michael Chen', caseSummary: '34-year-old male driver involved in high-speed motor vehicle accident with frontal impact, steering wheel deformation, and airbag deployment. Patient presented with severe chest pain (9/10) and respiratory distress. Initial assessment revealed seatbelt sign across chest and abdomen.\n\nImaging demonstrated multiple left-sided rib fractures (ribs 4–7) with associated pulmonary contusion and small left hemopneumothorax. No solid organ injury identified on CT scan.\n\nPatient managed with chest tube placement for hemopneumothorax with good clinical response. Discharged hospital day 5 in good condition with outpatient trauma surgery follow-up scheduled in 2 weeks.' },
+  { id: '2', mrn: 'MRN-2024-001235', name: 'Maria Garcia',    traumaNumber: 'TN-24-0892', hospitalAccountNumber: 'HA-884422', arrived: '2024-06-08 08:45', discharged: '',                mechanism: 'Fall',                activation: 'Level 3', ntdb: 'Yes', piAssigned: 'Sarah Williams', openFlags: 1, guidelines: [{ name: 'Traumatic Brain Injury', acronym: 'TBI', status: 'amber' }, { name: 'Geriatric Trauma', acronym: 'Ger.', status: 'green' }], status: 'In Progress', review: 'Primary',   age: 72, sex: 'Female', hospital: 'Grady Memorial',   level: 'Level 3', iss: 9,  triss: 6.2, niss: 11, admitService: 'Orthopedic Surgery', by: 'Dr. Patel',    left: '',                    los: 'Inpatient',  rc: 'Sarah Williams', pi: 'Sarah Williams', rcNurse: 'Sarah Williams', caseSummary: '72-year-old female presenting after unwitnessed mechanical fall at home. Sustained right hip fracture and mild traumatic brain injury with brief LOC. Ground-level fall with no identified prodrome.\n\nCT head negative for intracranial hemorrhage. Pelvis X-ray confirmed right intertrochanteric fracture. Orthopedics consulted for ORIF planning.\n\nCognitive baseline limited by mild dementia. Family contact established. Fall risk protocol initiated.' },
+  { id: '3', mrn: 'MRN-2024-001236', name: 'David Johnson',   traumaNumber: 'TN-24-0893', hospitalAccountNumber: 'HA-884423', arrived: '2024-06-08 11:20', discharged: '',                mechanism: 'Gunshot Wound',       activation: 'Level 1', ntdb: 'Yes', piAssigned: 'Dr. Thompson',   openFlags: 5, guidelines: [{ name: 'Traumatic Brain Injury', acronym: 'TBI', status: 'red' }, { name: 'Blunt Cardiac Injury', acronym: 'BCI', status: 'red' }], status: 'In Progress', review: 'M&M',       age: 28, sex: 'Male',   hospital: 'Grady Memorial',   level: 'Level 1', iss: 25, triss: 9.1, niss: 29, admitService: 'Trauma Surgery',     by: 'Dr. Thompson', left: '',                    los: 'Inpatient',  rc: 'Dr. Thompson', pi: 'Dr. Thompson', rcNurse: 'Dr. Thompson', caseSummary: '28-year-old male presenting with penetrating gunshot wound to the left chest. Single entry wound at 4th intercostal space midclavicular line, no exit wound identified. Hemodynamically unstable on arrival.\n\nEmergent left thoracotomy performed in ED. Cardiac laceration repaired. Transferred to OR for definitive hemorrhage control. Postoperative course complicated by ventilator-associated pneumonia.\n\nCurrently in SICU, day 6 post-injury. Multiple unresolved PI flags pending review.' },
+  { id: '4', mrn: 'MRN-2024-001237', name: 'Sarah Kim',       traumaNumber: 'TN-24-0894', hospitalAccountNumber: 'HA-884424', arrived: '2024-06-07 19:30', discharged: '2024-06-09 16:45', mechanism: 'Motorcycle Accident', activation: 'Level 2', ntdb: 'No',  piAssigned: 'Dr. Thompson',   openFlags: 0, guidelines: [{ name: 'Geriatric Trauma', acronym: 'Ger.', status: 'green' }], status: 'Completed',  review: 'Primary',   age: 34, sex: 'Female', hospital: 'Grady Memorial',   level: 'Level 2', iss: 6,  triss: 2.1, niss: 6,  admitService: 'General Surgery',    by: 'Dr. Lee',      left: 'Jun 9, 2024 16:45',  los: '1d 21h 15m', rc: 'Dr. Thompson', pi: 'Dr. Thompson', rcNurse: 'Dr. Thompson', caseSummary: '34-year-old female helmeted motorcyclist involved in side-impact collision. Presented with road rash and right clavicle fracture. Alert and oriented throughout.\n\nNo intracranial or intra-abdominal injuries identified on CT imaging. Orthopedics recommended conservative management for clavicle fracture. Discharged with sling and outpatient follow-up.\n\nNo open PI flags. Record marked complete.' },
+  { id: '5', mrn: 'MRN-2024-001238', name: 'Robert Williams', traumaNumber: 'TN-24-0895', hospitalAccountNumber: 'HA-884425', arrived: '2024-06-08 13:00', discharged: '',                mechanism: 'Pedestrian vs Auto',  activation: 'Level 2', ntdb: 'Yes', piAssigned: 'Sarah Williams', openFlags: 2, guidelines: [{ name: 'Traumatic Brain Injury', acronym: 'TBI', status: 'red' }, { name: 'Geriatric Trauma', acronym: 'Ger.', status: 'amber' }, { name: 'Spinal Cord Injury', acronym: 'SCI', status: 'green' }], status: 'In Progress', review: 'TPRC',      age: 81, sex: 'Male',   hospital: 'Mercy Hospital',   level: 'Level 2', iss: 17, triss: 7.8, niss: 22, admitService: 'Trauma Surgery',     by: 'Dr. Smith',    left: '',                    los: 'Inpatient',  rc: 'Michael Chen', pi: 'Sarah Williams', rcNurse: 'Michael Chen', caseSummary: '81-year-old male struck by vehicle while crossing intersection. Sustained multiple rib fractures (bilateral), splenic laceration grade II, and right femur fracture. Anticoagulated for atrial fibrillation.\n\nSplenic laceration managed non-operatively with angioembolization. Right femur ORIF performed day 2. Anticoagulation held peri-procedure.\n\nDelirium developed day 3, managed with reorientation protocol. Prolonged ICU course. Referred to TPRC given complexity and extended LOS.' },
 ];
 
 interface PIPatientListProps {
-  onPatientSelect: (patient: any) => void;
+  onPatientSelect: (patient: any, tab?: 'timeline' | 'guidelines') => void;
 }
 
 function SortIcon({ col, sortCol, sortDir }: { col: ColKey; sortCol: ColKey | null; sortDir: SortDir }) {
@@ -159,7 +88,6 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
   const [bulkAssignee, setBulkAssignee] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [irisOpenForId, setIrisOpenForId] = useState<string | null>(null);
-
   const setFilter = (key: ColKey, value: string) =>
     setFilters(prev => ({ ...prev, [key]: value }));
 
@@ -168,18 +96,26 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
     else { setSortCol(key); setSortDir('asc'); }
   };
 
-  const filtered = useMemo(() => patients.filter(p =>
-    COLUMNS.every(col => {
+  const filtered = useMemo(() => patients.filter(p => {
+    return COLUMNS.every(col => {
       const f = filters[col.key] ?? '';
       if (!f) return true;
       if (col.key === 'reviews') return p.review === f;
+      if (col.key === 'flags') {
+        const q = f.toLowerCase();
+        return p.guidelines.some(g => g.name.toLowerCase().includes(q) || g.acronym.toLowerCase().includes(q));
+      }
       return String(p[col.key as keyof Patient] ?? '').toLowerCase().includes(f.toLowerCase());
-    })
-  ), [filters]);
+    });
+  }), [filters]);
 
   const sorted = useMemo(() => {
     if (!sortCol) return filtered;
     return [...filtered].sort((a, b) => {
+      if (sortCol === 'flags') {
+        const diff = a.openFlags - b.openFlags;
+        return sortDir === 'asc' ? diff : -diff;
+      }
       const av = String(sortCol === 'reviews' ? a.review : (a[sortCol as keyof Patient] ?? '')).toLowerCase();
       const bv = String(sortCol === 'reviews' ? b.review : (b[sortCol as keyof Patient] ?? '')).toLowerCase();
       return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -212,43 +148,11 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
   const filterInp = 'w-full px-2 py-1 text-xs border border-teal-100 rounded focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white placeholder:text-teal-200';
 
   return (
+    <Tooltip.Provider>
     <div className="min-h-screen bg-gray-50">
       <div className="px-6 py-6 flex flex-col gap-6">
 
-        {/* ── Reviews row ─────────────────────────────────────────────────── */}
-        <section>
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Reviews</h2>
-          <div className="grid grid-cols-4 gap-4">
-            {reviewCounts.map(r => {
-              const isActive = filters.reviews === r.filterValue;
-              return (
-                <button
-                  key={r.label}
-                  onClick={() => setFilter('reviews', isActive ? '' : r.filterValue)}
-                  className={`rounded-xl border-2 px-4 py-3 flex items-center gap-2 transition-all text-left ${isActive ? r.activeColor : `${r.color} hover:opacity-80`}`}
-                >
-                  <span className="text-2xl font-bold">{r.count}</span>
-                  <span className="text-sm opacity-60">patients pending</span>
-                  <span className="text-sm font-bold ml-auto">{r.label}</span>
-                  {isActive && <span className="text-[10px] ml-1 opacity-60">✕</span>}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ── Guidelines rows ──────────────────────────────────────────────── */}
-        <section>
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Tracking</h2>
-          <div className="grid grid-cols-5 gap-4 mb-4">
-            {guidelinesRow1.map(g => <GuidelineBubble key={g.acronym} data={g} onPatientClick={name => { const p = patients.find(pt => pt.name === name); if (p) onPatientSelect(p); }} />)}
-          </div>
-          <div className="grid grid-cols-5 gap-4">
-            {guidelinesRow2.map(g => <GuidelineBubble key={g.acronym} data={g} onPatientClick={name => { const p = patients.find(pt => pt.name === name); if (p) onPatientSelect(p); }} />)}
-          </div>
-        </section>
-
-        {/* ── Patient Table ────────────────────────────────────────────────── */}
+        {/* ── Patient Table ────────────────────────────────────────────────────────────── */}
         <section className="flex flex-col gap-3">
 
           {/* Bulk action bar */}
@@ -300,25 +204,44 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
                         </button>
                       </th>
                     ))}
-                    <th className={thCls}>Flags</th>
                     <th className="w-8 px-2 py-2" />
                   </tr>
                   <tr className="bg-white border-b border-teal-100">
                     <td className="px-3 py-1.5" />
                     {COLUMNS.map(col => (
                       <td key={col.key} className="px-2 py-1.5">
-                        {col.key === 'reviews' ? (
+                        {col.key === 'flags' ? (
+                          <div className="relative flex items-center">
+                            <Search size={10} className="absolute left-1.5 text-teal-300 pointer-events-none" />
+                            <input
+                              type="text"
+                              placeholder="Guideline..."
+                              value={filters.flags ?? ''}
+                              onChange={e => setFilter('flags', e.target.value)}
+                              className={`${filterInp} pl-5 pr-5 max-w-[90px]`}
+                            />
+                            {filters.flags && (
+                              <button onClick={() => setFilter('flags', '')} className="absolute right-1 text-teal-300 hover:text-teal-600">
+                                <X size={10} />
+                              </button>
+                            )}
+                          </div>
+                        ) : col.key === 'reviews' ? (
                           <select
                             value={filters.reviews ?? ''}
                             onChange={e => setFilter('reviews', e.target.value)}
-                            className={filterInp}
+                            className={`${filterInp} max-w-[68px]`}
                           >
                             <option value="">All</option>
-                            <option value="Primary">Primary</option>
-                            <option value="Secondary">Secondary</option>
+                            <option value="Primary">1st</option>
+                            <option value="Secondary">2nd</option>
                             <option value="M&M">M&amp;M</option>
                             <option value="TPRC">TPRC</option>
                           </select>
+                        ) : col.key === 'activation' ? (
+                          <input type="text" placeholder="Filter..." value={filters[col.key] ?? ''} onChange={e => setFilter(col.key, e.target.value)} className={`${filterInp} max-w-[64px]`} />
+                        ) : col.key === 'rcNurse' || col.key === 'piAssigned' ? (
+                          <input type="text" placeholder="Filter..." value={filters[col.key] ?? ''} onChange={e => setFilter(col.key, e.target.value)} className={`${filterInp} max-w-[80px]`} />
                         ) : (
                           <input
                             type="text"
@@ -330,13 +253,12 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
                         )}
                       </td>
                     ))}
-                    <td className="px-2 py-1.5" />
-                    <td className="px-2 py-1.5" />
+                    <td className="w-8 px-2 py-1.5" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-teal-50">
                   {sorted.length === 0 ? (
-                    <tr><td colSpan={COLUMNS.length + 3} className="px-4 py-8 text-center text-sm text-gray-500">No patients match the current filters</td></tr>
+                    <tr><td colSpan={COLUMNS.length + 2} className="px-4 py-8 text-center text-sm text-gray-500">No patients match the current filters</td></tr>
                   ) : sorted.map(patient => {
                     const isExpanded = expandedId === patient.id;
                     const reviewColor = patient.review
@@ -363,8 +285,8 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
                         <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{patient.discharged || <span className="text-gray-300">—</span>}</td>
                         <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{patient.mechanism}</td>
                         <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{patient.activation}</td>
-                        <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{patient.rcNurse}</td>
-                        <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{patient.piAssigned}</td>
+                        <td className="px-3 py-2.5 text-gray-600 max-w-[90px] truncate">{patient.rcNurse}</td>
+                        <td className="px-3 py-2.5 text-gray-600 max-w-[90px] truncate">{patient.piAssigned}</td>
                         <td className="px-3 py-2.5">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${patient.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-teal-100 text-teal-800'}`}>
                             {patient.status}
@@ -376,12 +298,40 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
                             : <span className="text-gray-300">—</span>
                           }
                         </td>
-                        <td className="px-3 py-2.5">
-                          {patient.openFlags > 0
-                            ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 whitespace-nowrap">‼️ {patient.openFlags}</span>
-                            : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700 whitespace-nowrap">✅ 0</span>}
+                        <td className="px-3 py-2.5" onClick={e => { e.stopPropagation(); onPatientSelect(patient, 'guidelines'); }}>
+                          <Tooltip.Root delayDuration={200}>
+                            <Tooltip.Trigger asChild>
+                              <div className="cursor-default w-fit">
+                                {patient.openFlags > 0
+                                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 whitespace-nowrap">‼️ {patient.openFlags}</span>
+                                  : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700 whitespace-nowrap">✅ 0</span>}
+                              </div>
+                            </Tooltip.Trigger>
+                            <Tooltip.Portal>
+                              <Tooltip.Content
+                                side="left"
+                                sideOffset={8}
+                                className="z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-2.5 flex flex-col gap-1.5"
+                              >
+                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Guidelines</p>
+                                {patient.guidelines.map(g => (
+                                  <span
+                                    key={g.acronym}
+                                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold whitespace-nowrap ${
+                                      g.status === 'red' ? 'bg-red-100 text-red-700' :
+                                      g.status === 'amber' ? 'bg-amber-100 text-amber-700' :
+                                      'bg-green-100 text-green-700'
+                                    }`}
+                                  >
+                                    {g.acronym}
+                                  </span>
+                                ))}
+                                <Tooltip.Arrow className="fill-gray-200" />
+                              </Tooltip.Content>
+                            </Tooltip.Portal>
+                          </Tooltip.Root>
                         </td>
-                        <td className="px-2 py-2.5 text-center" onClick={e => { e.stopPropagation(); setExpandedId(isExpanded ? null : patient.id); if (isExpanded) setIrisOpenForId(null); }}>
+                        <td className="w-8 px-2 py-2.5 text-center flex-shrink-0" onClick={e => { e.stopPropagation(); setExpandedId(isExpanded ? null : patient.id); if (isExpanded) setIrisOpenForId(null); }}>
                           <button
                             className={`p-0.5 rounded transition-colors ${isExpanded ? 'text-teal-600 bg-teal-100' : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50'}`}
                             aria-label={isExpanded ? 'Collapse' : 'Expand quick review'}
@@ -392,7 +342,7 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
                       </tr>
                       {isExpanded && (
                         <tr className="bg-white border-b border-teal-100">
-                          <td colSpan={COLUMNS.length + 3} className="px-0 py-0">
+                          <td colSpan={COLUMNS.length + 2} className="px-0 py-0">
                             <div className={`border-l-4 ${reviewColor} mx-4 my-3 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex`}>
 
                               {/* Left: IRIS chat panel */}
@@ -457,7 +407,7 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
                                   <div className="text-[13px] text-gray-700 leading-relaxed whitespace-pre-line">{patient.caseSummary}</div>
                                 </div>
 
-                                {/* I.R.I.S. button */}
+                                {/* I.R.I.S. button — anchored bottom, mirroring patient record left nav */}
                                 <div className="px-4 pb-3 pt-1 border-t border-gray-100">
                                   <button
                                     onClick={e => { e.stopPropagation(); setIrisOpenForId(irisOpenForId === patient.id ? null : patient.id); }}
@@ -491,5 +441,6 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
 
 
     </div>
+    </Tooltip.Provider>
   );
 }

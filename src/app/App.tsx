@@ -9,8 +9,9 @@ import { HubRecord } from './components/HubRecord';
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [piInitialView, setPiInitialView] = useState<'timeline' | 'guidelines'>('timeline');
 
-  const handlePatientSelect = (patient: any) => {
+  const handlePatientSelect = (patient: any, tab?: 'timeline' | 'guidelines') => {
     const patientData = {
       mrn: patient.mrn,
       name: patient.name,
@@ -20,6 +21,7 @@ export default function App() {
       address: '123 Peachtree St NE, Atlanta, GA 30303',
       phone: '(404) 555-0123',
     };
+    setPiInitialView(tab ?? 'timeline');
     setSelectedPatient(patientData);
   };
 
@@ -53,7 +55,11 @@ export default function App() {
           )
         ) : (
           selectedPatient ? (
-            <PIPatientRecord patient={selectedPatient} onBackToList={handleBackToList} />
+            <PIPatientRecord
+              patient={selectedPatient}
+              onBackToList={handleBackToList}
+              initialView={piInitialView === 'guidelines' ? { type: 'guidelines-htabs', activeId: 'overview' } : { type: 'timeline3' }}
+            />
           ) : (
             <PIPatientList onPatientSelect={handlePatientSelect} />
           )

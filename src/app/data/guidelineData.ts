@@ -33,6 +33,29 @@ export function getAlertCounts(guideline: Guideline): { amber: number; red: numb
   };
 }
 
+export interface NeurochecksData {
+  ordered: string;
+  total: number;
+  losHours: number;
+  nonCompliant: number;
+}
+
+export function computeNeurochecksStatus(data: NeurochecksData): FlagStatus {
+  const expected = data.losHours - 1;
+  if (expected <= 0) return 'green';
+  const ratio = data.total / expected;
+  if (ratio >= 0.8) return 'green';
+  if (ratio >= 0.6) return 'amber';
+  return 'red';
+}
+
+// Keyed by patient MRN
+export const NEUROCHECK_DATA: Record<string, NeurochecksData> = {
+  'MRN-2024-001234': { ordered: 'Hourly', total: 14, losHours: 25, nonCompliant: 3 }, // John Anderson → Red
+  'MRN-2024-001235': { ordered: 'Hourly', total: 16, losHours: 25, nonCompliant: 2 }, // Maria Garcia → Amber
+  'MRN-2024-001238': { ordered: 'Hourly', total: 20, losHours: 25, nonCompliant: 1 }, // Robert Williams → Green
+};
+
 export const mockGuidelines: Guideline[] = [
   {
     id: 'tbi',
@@ -41,12 +64,7 @@ export const mockGuidelines: Guideline[] = [
     categories: [
       {
         name: 'Neurologic Monitoring',
-        flags: [
-          { label: 'Neurochecks Hourly', status: 'green' },
-          { label: 'GCS Stable', status: 'green' },
-          { label: 'Motor Exam Stable', status: 'green' },
-          { label: 'Pupils Reactive', status: 'green' },
-        ],
+        flags: [],
       },
       {
         name: 'Imaging & Neurosurgery',

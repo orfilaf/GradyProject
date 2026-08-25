@@ -252,7 +252,7 @@ function GuidelineDetail({ guideline, patientMrn, onNavigateToTimeline }: { guid
 
 // ── Main PIPatientRecord component ─────────────────────────────────────────────
 export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatientRecordProps) {
-  const [activeView, setActiveView] = useState<ActiveView>(initialView ?? { type: 'timeline3' });
+  const [activeView, setActiveView] = useState<ActiveView>(initialView ?? { type: 'pips' });
   const [registryExpanded, setRegistryExpanded] = useState(false);
   const [irisOpen, setIrisOpen] = useState(false);
   const [irisKey, setIrisKey] = useState(0);
@@ -868,6 +868,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                                                 </div>
                                               ))}
                                             </div>
+
                                           </div>
                                         )}
                                       </div>
@@ -1200,15 +1201,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
         <aside className={`${navCollapsed ? 'w-12' : 'w-44'} bg-white border-r border-teal-200 flex-shrink-0 flex flex-col overflow-y-auto transition-all duration-200`}>
           <div className="flex flex-col py-2">
 
-            <button
-              onClick={() => setActiveView({ type: 'timeline3' })}
-              title={navCollapsed ? 'Timeline' : undefined}
-              className={navBtnCls(activeView.type === 'timeline3')}
-            >
-              <GitBranch className="w-4 h-4 flex-shrink-0" />
-              {!navCollapsed && <span className="flex-1 leading-tight">Timeline</span>}
-            </button>
-
+            {/* PIPS */}
             <button
               onClick={() => setActiveView({ type: 'pips' })}
               title={navCollapsed ? 'PIPS' : undefined}
@@ -1218,6 +1211,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
               {!navCollapsed && <span className="flex-1 leading-tight">PIPS</span>}
             </button>
 
+            {/* Care Guidelines */}
             <button
               onClick={() => setActiveView({ type: 'guidelines-htabs', activeId: 'overview' })}
               title={navCollapsed ? 'Care Guidelines' : undefined}
@@ -1227,14 +1221,25 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
               {!navCollapsed && <span className="flex-1 leading-tight">Care Guidelines</span>}
             </button>
 
+            {/* Timeline */}
+            <button
+              onClick={() => setActiveView({ type: 'timeline3' })}
+              title={navCollapsed ? 'Timeline' : undefined}
+              className={navBtnCls(activeView.type === 'timeline3')}
+            >
+              <GitBranch className="w-4 h-4 flex-shrink-0" />
+              {!navCollapsed && <span className="flex-1 leading-tight">Timeline</span>}
+            </button>
+
+            {/* Patient Record — expandable accordion */}
             <div>
               <button
                 onClick={() => setRegistryExpanded(v => !v)}
-                title={navCollapsed ? 'Registry' : undefined}
+                title={navCollapsed ? 'Patient Record' : undefined}
                 className={navBtnCls(activeView.type === 'registry')}
               >
                 <Archive className="w-4 h-4 flex-shrink-0" />
-                {!navCollapsed && <><span className="flex-1 leading-tight">Registry</span>
+                {!navCollapsed && <><span className="flex-1 leading-tight">Patient Record</span>
                 <Lock size={10} className="text-gray-400 flex-shrink-0 mr-1" />
                 {registryExpanded ? <ChevronDown size={13} className="flex-shrink-0" /> : <ChevronRight size={13} className="flex-shrink-0" />}</> }
               </button>
@@ -1263,6 +1268,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
               )}
             </div>
 
+            {/* I.R.I.S. */}
             <div className={`pt-3 pb-1 ${navCollapsed ? 'px-1' : 'px-3'}`}>
               <button
                 onClick={() => setIrisOpen(v => !v)}

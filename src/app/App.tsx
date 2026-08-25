@@ -9,7 +9,7 @@ import { HubRecord } from './components/HubRecord';
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
-  const [piInitialView, setPiInitialView] = useState<'timeline' | 'guidelines'>('timeline');
+  const [piInitialView, setPiInitialView] = useState<'timeline' | 'guidelines'>('guidelines');
 
   const handlePatientSelect = (patient: any, tab?: 'timeline' | 'guidelines') => {
     const patientData = {
@@ -21,7 +21,7 @@ export default function App() {
       address: '123 Peachtree St NE, Atlanta, GA 30303',
       phone: '(404) 555-0123',
     };
-    setPiInitialView(tab ?? 'timeline');
+    setPiInitialView(tab ?? 'guidelines');
     setSelectedPatient(patientData);
   };
 

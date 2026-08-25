@@ -252,7 +252,7 @@ function GuidelineDetail({ guideline, patientMrn, onNavigateToTimeline }: { guid
 
 // ── Main PIPatientRecord component ─────────────────────────────────────────────
 export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatientRecordProps) {
-  const [activeView, setActiveView] = useState<ActiveView>(initialView ?? { type: 'pips' });
+  const [activeView, setActiveView] = useState<ActiveView>(initialView ?? { type: 'guidelines-htabs', activeId: 'overview' });
   const [registryExpanded, setRegistryExpanded] = useState(false);
   const [irisOpen, setIrisOpen] = useState(false);
   const [irisKey, setIrisKey] = useState(0);
@@ -868,7 +868,6 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                                                 </div>
                                               ))}
                                             </div>
-
                                           </div>
                                         )}
                                       </div>
@@ -1201,16 +1200,6 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
         <aside className={`${navCollapsed ? 'w-12' : 'w-44'} bg-white border-r border-teal-200 flex-shrink-0 flex flex-col overflow-y-auto transition-all duration-200`}>
           <div className="flex flex-col py-2">
 
-            {/* PIPS */}
-            <button
-              onClick={() => setActiveView({ type: 'pips' })}
-              title={navCollapsed ? 'PIPS' : undefined}
-              className={navBtnCls(activeView.type === 'pips')}
-            >
-              <ChartLine className="w-4 h-4 flex-shrink-0" />
-              {!navCollapsed && <span className="flex-1 leading-tight">PIPS</span>}
-            </button>
-
             {/* Care Guidelines */}
             <button
               onClick={() => setActiveView({ type: 'guidelines-htabs', activeId: 'overview' })}
@@ -1219,6 +1208,16 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
             >
               <BookOpen className="w-4 h-4 flex-shrink-0" />
               {!navCollapsed && <span className="flex-1 leading-tight">Care Guidelines</span>}
+            </button>
+
+            {/* PIPS */}
+            <button
+              onClick={() => setActiveView({ type: 'pips' })}
+              title={navCollapsed ? 'PIPS' : undefined}
+              className={navBtnCls(activeView.type === 'pips')}
+            >
+              <ChartLine className="w-4 h-4 flex-shrink-0" />
+              {!navCollapsed && <span className="flex-1 leading-tight">PIPS</span>}
             </button>
 
             {/* Timeline */}

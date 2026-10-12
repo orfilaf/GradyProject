@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PatientHeader } from './PatientHeader';
 import {
   Activity, Flame, Brain, Heart, Microscope, Bug,
   User, CreditCard, FileText, Phone, ChevronRight,
@@ -364,50 +365,53 @@ export function HubRecordB({ patient, onBackToList }: Props) {
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-gray-50">
-      <aside className="w-56 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
-        <div className="px-3 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-bold text-indigo-700">{patient.name.split(' ').map(n => n[0]).join('')}</span>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-gray-800 truncate">{patient.name}</p>
-              <p className="text-[10px] text-gray-400 font-mono">{patient.mrn}</p>
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+      <PatientHeader patient={patient} onBackToList={onBackToList} />
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="w-56 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
+          <div className="px-3 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-indigo-700">{patient.name.split(' ').map(n => n[0]).join('')}</span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-gray-800 truncate">{patient.name}</p>
+                <p className="text-[10px] text-gray-400 font-mono">{patient.mrn}</p>
+              </div>
             </div>
           </div>
-        </div>
-        <SidebarSection label="Patient" />
-        <div className="px-2 flex flex-col gap-0.5">
-          {PATIENT_INFO.map(item => {
-            const Icon = item.icon;
-            const isSelected = selected?.kind === 'patient-info' && selected.id === item.id;
-            return (
-              <button key={item.id} onClick={() => setSelected(item)}
-                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition-colors ${isSelected ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                <Icon size={12} />
-                <span className="text-xs font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-        <SidebarSection label="Registries" />
-        <div className="px-2 flex flex-col gap-0.5">
-          {REGISTRIES.map(reg => <RegistryNavGroup key={reg.id} reg={reg} selected={selected} onSelect={setSelected} />)}
-        </div>
-        <SidebarSection label="Process Improvement" />
-        <div className="px-2 flex flex-col gap-0.5 pb-4">
-          {REGISTRIES.map(reg => <RegistryNavGroup key={reg.id} reg={reg} selected={selected} onSelect={setSelected} isPIGroup />)}
-        </div>
-      </aside>
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-7 py-6 max-w-3xl">
-          <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-4">
-            <span className="font-medium text-indigo-600">{patient.name}</span>
-            <ChevronRight size={12} />
-            <span>{contentTitle()}</span>
+          <SidebarSection label="Patient" />
+          <div className="px-2 flex flex-col gap-0.5">
+            {PATIENT_INFO.map(item => {
+              const Icon = item.icon;
+              const isSelected = selected?.kind === 'patient-info' && selected.id === item.id;
+              return (
+                <button key={item.id} onClick={() => setSelected(item)}
+                  className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition-colors ${isSelected ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                  <Icon size={12} />
+                  <span className="text-xs font-medium">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
-          {renderContent()}
+          <SidebarSection label="Registries" />
+          <div className="px-2 flex flex-col gap-0.5">
+            {REGISTRIES.map(reg => <RegistryNavGroup key={reg.id} reg={reg} selected={selected} onSelect={setSelected} />)}
+          </div>
+          <SidebarSection label="Process Improvement" />
+          <div className="px-2 flex flex-col gap-0.5 pb-4">
+            {REGISTRIES.map(reg => <RegistryNavGroup key={reg.id} reg={reg} selected={selected} onSelect={setSelected} isPIGroup />)}
+          </div>
+        </aside>
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-7 py-6 max-w-3xl">
+            <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-4">
+              <span className="font-medium text-indigo-600">{patient.name}</span>
+              <ChevronRight size={12} />
+              <span>{contentTitle()}</span>
+            </div>
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>

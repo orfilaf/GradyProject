@@ -5,11 +5,13 @@ import { PatientList } from './components/PatientList';
 import { PIPatientList } from './components/PIPatientList';
 import { PIPatientRecord } from './components/PIPatientRecord';
 import { HubRecordB } from './components/HubRecordB';
+import { RegistrySubNav, RegistrySection } from './components/RegistrySubNav';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [piInitialView, setPiInitialView] = useState<'timeline' | 'guidelines'>('guidelines');
+  const [registrySection, setRegistrySection] = useState<RegistrySection>('home');
 
   const handlePatientSelect = (patient: any, tab?: 'timeline' | 'guidelines') => {
     const patientData = {
@@ -40,6 +42,9 @@ export default function App() {
         onModuleSwitch={handleModuleSwitch}
         onBackToList={selectedPatient ? handleBackToList : undefined}
       />
+      {activeModule === 'registry' && (
+        <RegistrySubNav active={registrySection} onChange={setRegistrySection} />
+      )}
       <div className="flex-1 overflow-y-auto flex flex-col">
         {activeModule === 'hub' ? (
           selectedPatient ? (

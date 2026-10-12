@@ -6,6 +6,7 @@ import { PIPatientList } from './components/PIPatientList';
 import { PIPatientRecord } from './components/PIPatientRecord';
 import { HubRecordB } from './components/HubRecordB';
 import { RegistrySubNav, RegistrySection } from './components/RegistrySubNav';
+import { RegistrySubmissions } from './components/RegistrySubmissions';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -58,14 +59,16 @@ export default function App() {
             <PatientList onPatientSelect={handlePatientSelect} />
           )
         ) : activeModule === 'registry' ? (
-          (registrySection === 'home' || registrySection === 'cases')
+          registrySection === 'home' || registrySection === 'cases'
             ? selectedPatient
               ? <PatientRecord patient={selectedPatient} onBackToList={handleBackToList} />
               : <PatientList
                   onPatientSelect={handlePatientSelect}
                   showDashboard={registrySection === 'home'}
                 />
-            : null
+            : registrySection === 'submissions'
+              ? <RegistrySubmissions />
+              : null
         ) : (
           selectedPatient ? (
             <PIPatientRecord

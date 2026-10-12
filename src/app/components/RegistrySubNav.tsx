@@ -1,10 +1,11 @@
-import { Home, Users } from 'lucide-react';
+import { Home, Users, Send } from 'lucide-react';
 
-export type RegistrySection = 'home' | 'cases';
+export type RegistrySection = 'home' | 'cases' | 'submissions';
 
 const REGISTRY_TABS = [
-  { id: 'home'  as RegistrySection, label: 'Home',  icon: Home  },
-  { id: 'cases' as RegistrySection, label: 'Cases', icon: Users },
+  { id: 'home'        as RegistrySection, label: 'Home',        icon: Home  },
+  { id: 'cases'       as RegistrySection, label: 'Cases',       icon: Users },
+  { id: 'submissions' as RegistrySection, label: 'Submissions', icon: Send  },
 ];
 
 interface RegistrySubNavProps {

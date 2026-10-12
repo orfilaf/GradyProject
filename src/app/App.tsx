@@ -12,6 +12,7 @@ import { RegistryDictionary } from './components/RegistryDictionary';
 import { RegistryAdmin } from './components/RegistryAdmin';
 import { PISubNav, PISection } from './components/PISubNav';
 import { PIPSSection } from './components/PIPSSection';
+import { PIDashboard } from './components/PIDashboard';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -106,7 +107,9 @@ export default function App() {
                     initialView={{ type: 'pips' }}
                   />
                 : <PIPSSection onPatientSelect={handlePatientSelect} />
-              : null
+              : piSection === 'dashboard'
+                ? <PIDashboard />
+                : null
         ) : null}
       </div>
     </div>

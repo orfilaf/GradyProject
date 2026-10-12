@@ -746,29 +746,18 @@ export function PIPSSection({ onPatientSelect }: PIPSSectionProps) {
   };
 
   return (
-    <div className="flex-1 bg-gray-50 overflow-y-auto">
-      <div className="px-8 py-6 max-w-5xl">
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-6 py-6 flex flex-col gap-6">
 
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-white border border-teal-200 flex items-center justify-center shadow-sm">
-            <ClipboardList size={17} className="text-teal-600" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-gray-900">PIPS Review Queue</h1>
-            <p className="text-xs text-gray-400">{CASES.filter(c => !c.completed).length} open · {CASES.filter(c => c.completed).length} completed</p>
-          </div>
-        </div>
-
-        {/* Review stage count tiles */}
-        <div className="grid grid-cols-4 gap-3 mb-5">
+        {/* Stage count tiles */}
+        <div className="grid grid-cols-4 gap-3">
           {([
             { label: '1st Review',   stage: 'Primary Review',   bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700',    count: stageCounts['Primary Review']   },
             { label: '2nd Review',   stage: 'Secondary Review', bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700',   count: stageCounts['Secondary Review'] },
             { label: 'M&M',          stage: 'M&M',              bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-700',     count: stageCounts['M&M']              },
             { label: 'TPRC',         stage: 'TPRC',             bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', count: stageCounts['TPRC']             },
           ] as { label: string; stage: ReviewStage; bg: string; border: string; text: string; count: number }[]).map(t => (
-            <div key={t.stage} className={`${t.bg} border ${t.border} rounded-xl px-4 py-3 flex flex-col gap-0.5`}>
+            <div key={t.stage} className={`${t.bg} border ${t.border} rounded-lg px-4 py-3 flex flex-col gap-0.5`}>
               <span className={`text-2xl font-bold ${t.text}`}>{t.count}</span>
               <span className="text-xs font-semibold text-gray-600">{t.label}</span>
               <span className="text-[10px] text-gray-400">pending review</span>
@@ -777,61 +766,60 @@ export function PIPSSection({ onPatientSelect }: PIPSSectionProps) {
         </div>
 
         {/* Case table */}
-        <div className="bg-white rounded-xl border border-teal-100 overflow-hidden shadow-sm">
-          <div className="px-4 py-2.5 border-b border-teal-100 bg-teal-50 flex items-center justify-between">
-            <span className="text-xs font-bold text-teal-800 uppercase tracking-wide">Cases Awaiting Review</span>
-            <span className="text-[10px] text-teal-600">{CASES.length} total</span>
-          </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                {['Review ID', 'Patient', 'Date', 'Mechanism', 'ISS', 'Stage', 'Flags', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {CASES.map(c => (
-                <tr key={c.id} className={`hover:bg-teal-50/40 transition-colors ${c.completed ? 'opacity-60' : ''}`}>
-                  <td className="px-4 py-3">
-                    <span className="text-xs font-mono font-semibold text-gray-600">{c.reviewId}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-xs font-semibold text-gray-800">{c.patient}</p>
-                    <p className="text-[10px] text-gray-400 font-mono">{c.mrn}</p>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{c.date}</td>
-                  <td className="px-4 py-3 text-xs text-gray-600 max-w-[180px] truncate">{c.mechanism}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs font-bold ${c.iss >= 25 ? 'text-red-600' : c.iss >= 16 ? 'text-amber-600' : 'text-gray-600'}`}>{c.iss}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${c.completed ? 'bg-gray-100 text-gray-400 border-gray-200' : STAGE_COLORS[c.stage]}`}>
-                      {c.completed ? 'Completed' : c.stage}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {c.flags > 0 ? (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-red-500">
-                        <AlertTriangle size={10} /> {c.flags}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-gray-300">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => handleOpen(c)}
-                      className="flex items-center gap-1 text-[11px] font-semibold text-teal-600 hover:text-teal-800 transition-colors ml-auto"
-                    >
-                      Open <ChevronRight size={12} />
-                    </button>
-                  </td>
+        <div className="bg-white rounded-lg border border-teal-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-teal-100 border-b border-teal-200">
+                  {['Review ID', 'Patient', 'Date', 'Mechanism', 'ISS', 'Stage', 'Flags', ''].map(h => (
+                    <th key={h} className="text-left px-3 py-2 text-[11px] font-semibold text-teal-900 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-teal-50">
+                {CASES.map(c => (
+                  <tr key={c.id} className={`hover:bg-teal-50 transition-colors ${c.completed ? 'opacity-60' : ''}`}>
+                    <td className="px-3 py-2.5">
+                      <span className="font-mono font-semibold text-gray-600">{c.reviewId}</span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <p className="font-semibold text-gray-800">{c.patient}</p>
+                      <p className="text-[10px] text-gray-400 font-mono">{c.mrn}</p>
+                    </td>
+                    <td className="px-3 py-2.5 text-gray-500 whitespace-nowrap">{c.date}</td>
+                    <td className="px-3 py-2.5 text-gray-600 max-w-[180px] truncate">{c.mechanism}</td>
+                    <td className="px-3 py-2.5">
+                      <span className={`font-bold ${c.iss >= 25 ? 'text-red-600' : c.iss >= 16 ? 'text-amber-600' : 'text-gray-600'}`}>{c.iss}</span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${c.completed ? 'bg-gray-100 text-gray-400 border-gray-200' : STAGE_COLORS[c.stage]}`}>
+                        {c.completed ? 'Completed' : c.stage}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      {c.flags > 0 ? (
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-red-500">
+                          <AlertTriangle size={10} /> {c.flags}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-right">
+                      <button
+                        onClick={() => handleOpen(c)}
+                        className="flex items-center gap-1 text-[11px] font-semibold text-teal-600 hover:text-teal-800 transition-colors ml-auto"
+                      >
+                        Open <ChevronRight size={12} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
     </div>
   );

@@ -10,12 +10,14 @@ import { RegistrySubmissions } from './components/RegistrySubmissions';
 import { RegistryReports } from './components/RegistryReports';
 import { RegistryDictionary } from './components/RegistryDictionary';
 import { RegistryAdmin } from './components/RegistryAdmin';
+import { PISubNav, PISection } from './components/PISubNav';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [piInitialView, setPiInitialView] = useState<'timeline' | 'guidelines'>('guidelines');
   const [registrySection, setRegistrySection] = useState<RegistrySection>('home');
+  const [piSection, setPiSection] = useState<PISection>('home');
 
   const handlePatientSelect = (patient: any, tab?: 'timeline' | 'guidelines') => {
     const patientData = {
@@ -53,6 +55,9 @@ export default function App() {
       />
       {activeModule === 'registry' && (
         <RegistrySubNav active={registrySection} onChange={handleRegistrySection} />
+      )}
+      {activeModule === 'pi' && (
+        <PISubNav active={piSection} onChange={setPiSection} />
       )}
       <div className="flex-1 overflow-y-auto flex flex-col">
         {activeModule === 'hub' ? (

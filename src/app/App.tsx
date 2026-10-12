@@ -7,6 +7,7 @@ import { PIPatientRecord } from './components/PIPatientRecord';
 import { HubRecordB } from './components/HubRecordB';
 import { RegistrySubNav, RegistrySection } from './components/RegistrySubNav';
 import { RegistrySubmissions } from './components/RegistrySubmissions';
+import { RegistryReports } from './components/RegistryReports';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -68,7 +69,9 @@ export default function App() {
                 />
             : registrySection === 'submissions'
               ? <RegistrySubmissions />
-              : null
+              : registrySection === 'reports'
+                ? <RegistryReports />
+                : null
         ) : (
           selectedPatient ? (
             <PIPatientRecord

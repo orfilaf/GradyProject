@@ -9,6 +9,7 @@ import { RegistrySubNav, RegistrySection } from './components/RegistrySubNav';
 import { RegistrySubmissions } from './components/RegistrySubmissions';
 import { RegistryReports } from './components/RegistryReports';
 import { RegistryDictionary } from './components/RegistryDictionary';
+import { RegistryAdmin } from './components/RegistryAdmin';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -74,7 +75,9 @@ export default function App() {
                 ? <RegistryReports />
                 : registrySection === 'dictionary'
                   ? <RegistryDictionary />
-                  : null
+                  : registrySection === 'admin'
+                    ? <RegistryAdmin />
+                    : null
         ) : (
           selectedPatient ? (
             <PIPatientRecord

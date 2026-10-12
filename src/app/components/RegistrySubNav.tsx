@@ -1,6 +1,6 @@
-import { Home, Users, Send, FileText, Database } from 'lucide-react';
+import { Home, Users, Send, FileText, Database, Settings } from 'lucide-react';
 
-export type RegistrySection = 'home' | 'cases' | 'submissions' | 'reports' | 'dictionary';
+export type RegistrySection = 'home' | 'cases' | 'submissions' | 'reports' | 'dictionary' | 'admin';
 
 const REGISTRY_TABS = [
   { id: 'home'        as RegistrySection, label: 'Home',            icon: Home     },
@@ -8,6 +8,7 @@ const REGISTRY_TABS = [
   { id: 'submissions' as RegistrySection, label: 'Submissions',     icon: Send     },
   { id: 'reports'     as RegistrySection, label: 'Reports',         icon: FileText },
   { id: 'dictionary'  as RegistrySection, label: 'Data Dictionary', icon: Database },
+  { id: 'admin'       as RegistrySection, label: 'Admin',           icon: Settings },
 ];
 
 interface RegistrySubNavProps {

@@ -35,10 +35,12 @@ import {
 } from 'lucide-react';
 import { AISourceModal } from './AISourceModal';
 import { aiFieldData } from '../data/aiMockData';
+import { PIPSReviewForm } from './PIPSSection';
 
 type ActiveView =
   | { type: 'timeline3' }
   | { type: 'pips' }
+  | { type: 'pips2' }
   | { type: 'guidelines-overview' }
   | { type: 'guideline'; id: string }
   | { type: 'guidelines-htabs'; activeId: string }
@@ -112,6 +114,7 @@ function GuidelineBubble({ guideline, onClick }: { guideline: Guideline; onClick
       onClick={onClick}
       className={`bg-white rounded-xl border-2 ${borderColor} text-left hover:shadow-md transition-all w-full`}
     >
+      {/* Card header */}
       <div className={`${headerBg} rounded-t-xl px-4 py-3 flex items-start justify-between`}>
         <div>
           <span className={`text-[10px] font-bold tracking-widest uppercase ${acronymColor}`}>{guideline.acronym}</span>
@@ -120,6 +123,7 @@ function GuidelineBubble({ guideline, onClick }: { guideline: Guideline; onClick
         <span className="text-xl leading-none flex-shrink-0 ml-2">{STATUS_ICON[worst]}</span>
       </div>
 
+      {/* Card body */}
       <div className="px-4 py-3">
         {alertFlags.length === 0 ? (
           <p className="text-xs text-green-600 font-medium">All {counts.green} criteria met</p>
@@ -136,6 +140,7 @@ function GuidelineBubble({ guideline, onClick }: { guideline: Guideline; onClick
           </div>
         )}
 
+        {/* Flag summary chips */}
         <div className="flex items-center gap-2 mt-3 pt-2 border-t border-gray-100">
           {counts.red > 0 && (
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">‼️ {counts.red}</span>
@@ -267,6 +272,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
   const [dismissConfirm, setDismissConfirm] = useState<{ id: string; name: string } | null>(null);
   const [addSearchOpen, setAddSearchOpen] = useState(false);
   const [addSearchQuery, setAddSearchQuery] = useState('');
+  // Timeline 3 filter state
   const [tl3FilterWhere, setTl3FilterWhere] = useState('');
   const [tl3FilterWhat, setTl3FilterWhat] = useState('');
   const [tl3FilterWhenStart, setTl3FilterWhenStart] = useState('');
@@ -277,6 +283,9 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
   const [caseSummaryBadgeHover, setCaseSummaryBadgeHover] = useState(false);
   const [aiConfirmed, setAiConfirmed] = useState<Record<string, boolean>>({});
   const [reviewDates, setReviewDates] = useState<Record<string, string>>({
+    primary: '', secondary: '', mam: '', tprc: '',
+  });
+  const [reviewDates2, setReviewDates2] = useState<Record<string, string>>({
     primary: '', secondary: '', mam: '', tprc: '',
   });
 
@@ -314,6 +323,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
         : 'border-transparent text-gray-600 hover:bg-teal-50/60 hover:text-teal-800'
     }`;
 
+// ── Render: PIPS ────────────────────────────────────────────────────────────
   const renderPIPS = () => (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
@@ -321,6 +331,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
         <span className="text-xs text-teal-600 font-medium bg-teal-100 px-2 py-0.5 rounded-full">Process Improvement</span>
       </div>
 
+      {/* Reviews date strip */}
       <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-1.5">
         <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2 flex-shrink-0">Reviews</span>
         {[
@@ -342,6 +353,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
         ))}
       </div>
 
+      {/* Case Summary */}
       <div className="bg-white rounded-lg border border-teal-200 p-3">
         <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-teal-100">
           <h3 className="text-base font-semibold text-gray-700">Case Summary</h3>
@@ -392,11 +404,46 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     </div>
   );
 
+  const renderPIPS2 = () => (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900">PIPS 2</h2>
+        <span className="text-xs text-teal-700 font-medium bg-teal-100 px-2 py-0.5 rounded-full">Process Improvement</span>
+      </div>
+
+      {/* Reviews date strip */}
+      <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-1.5">
+        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2 flex-shrink-0">Reviews</span>
+        {[
+          { key: 'primary',   label: 'Primary',   border: 'border-blue-300',    bg: 'bg-blue-50',    text: 'text-blue-700',    ring: 'focus:ring-blue-300' },
+          { key: 'secondary', label: 'Secondary', border: 'border-amber-300',   bg: 'bg-amber-50',   text: 'text-amber-700',   ring: 'focus:ring-amber-300' },
+          { key: 'mam',       label: 'M&M',       border: 'border-red-300',     bg: 'bg-red-50',     text: 'text-red-700',     ring: 'focus:ring-red-300' },
+          { key: 'tprc',      label: 'TPRC',      border: 'border-emerald-300', bg: 'bg-emerald-50', text: 'text-emerald-700', ring: 'focus:ring-emerald-300' },
+        ].map((r, i) => (
+          <div key={r.key} className="flex items-center gap-1.5 flex-shrink-0">
+            {i > 0 && <span className="text-gray-200 text-xs">·</span>}
+            <label className={`text-xs font-semibold ${r.text} whitespace-nowrap`}>{r.label}</label>
+            <input
+              type="date"
+              value={reviewDates2[r.key] ?? ''}
+              onChange={e => setReviewDates2(prev => ({ ...prev, [r.key]: e.target.value }))}
+              className={`text-xs px-2 py-1 rounded border ${r.border} ${r.bg} ${r.text} focus:outline-none focus:ring-1 ${r.ring} w-[130px]`}
+            />
+          </div>
+        ))}
+      </div>
+
+      <PIPSReviewForm patientName={patient.name} mrn={patient.mrn} flags={3} />
+    </div>
+  );
+
+  // ── Timeline data & render ──────────────────────────────────────────────────
+
   type TLEvent = {
     id: string;
     location: string;
     what: string;
-    when: string;
+    when: string; // ISO-ish for sorting, displayed as human-readable
     description: string;
     who: string;
     sourceText: string;
@@ -440,16 +487,20 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
   const DEFAULT_ACTION = { dot: 'bg-gray-400', badge: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' };
 
   const tlEvents: TLEvent[] = [
+    // ── SCENE ──────────────────────────────────────────────────────────────
     { id: 'tl1',       location: 'Scene',          what: 'Vitals',            when: '2024-06-07 14:10', description: 'Temp 36.8 °C · HR 89 · Resp 18 · BP 137/92 · MAP 105 mmHg · SpO2 99% · Position: Supine', who: 'Grady Transport', sourceText: 'Scene vitals obtained by EMS upon patient contact. GCS 15 at scene.' },
     { id: 'tl2',       location: 'Scene',          what: 'Neuro / GCS',       when: '2024-06-07 14:11', description: 'General: No focal deficit. Mental Status: Alert. GCS Eye 4 · Verbal 5 · Motor 6 = GCS 15. Sensation intact. Motor function intact.', who: 'Grady Transport', sourceText: 'Scene neurological assessment per EMS protocol. Patient cooperative and oriented x4.' },
     { id: 'tl3',       location: 'Scene',          what: 'Treatment',         when: '2024-06-07 14:13', description: 'Venous access established · Wound care applied · Cervical collar placed · Backboard immobilization', who: 'Grady Transport', sourceText: 'Scene interventions per trauma protocol. Two large-bore IVs established bilateral antecubital.' },
     { id: 'tl_s_out',  location: 'Scene',          what: 'Transfer Out',      when: '2024-06-07 14:15', description: 'Transfer to En-Route — patient loaded, transport initiated', who: 'Grady Transport', sourceText: 'Patient loaded onto transport unit at 14:15.' },
+    // ── EN-ROUTE ───────────────────────────────────────────────────────────
     { id: 'tl4',       location: 'En-Route',       what: 'Triage Assessment', when: '2024-06-07 14:18', description: 'Trauma Level 1 · Mechanism: High-speed MVC, frontal impact, airbag deployment, steering wheel deformation · Activation requested', who: 'Grady Transport', sourceText: 'Radio notification to Grady ED at 14:18. Trauma team activation requested en route per Level 1 criteria.' },
     { id: 'tl6',       location: 'En-Route',       what: 'Trauma Activation', when: '2024-06-07 14:19', description: 'Activation called by communication center. Trauma team assembled and waiting on arrival.', who: 'Grady Comm Center', sourceText: 'Trauma activation paged at 14:19. Attending surgeon, anesthesia, nursing notified.' },
     { id: 'tl5',       location: 'En-Route',       what: 'Vitals',            when: '2024-06-07 14:20', description: 'Temp 36.6 °C · HR 102 · Resp 20 · BP 124/84 · SpO2 97% · O2 via NRB mask 15 L/min', who: 'Grady Transport', sourceText: 'En-route vitals obtained at approx. 5 min post-departure from scene.' },
     { id: 'tl_er_out', location: 'En-Route',       what: 'Transfer Out',      when: '2024-06-07 14:28', description: 'Transfer to Ambulance Bay — arrival imminent', who: 'Grady Transport', sourceText: 'EMS radioed arrival at 14:28. Trauma bay cleared.' },
+    // ── AMBULANCE BAY ──────────────────────────────────────────────────────
     { id: 'tl7',       location: 'Ambulance Bay',  what: 'Arrival',           when: '2024-06-07 14:30', description: 'Ground transport — Grady Transport Unit 7. Patient on backboard, cervical collar in place.', who: 'Grady Transport', sourceText: 'Patient arrived Ambulance Bay at 14:30 via ground EMS. Handoff to trauma team completed.' },
     { id: 'tl_ab_out', location: 'Ambulance Bay',  what: 'Transfer Out',      when: '2024-06-07 14:31', description: 'Transfer to Emergency Dept — trauma bay TR-04', who: 'Grady Transport', sourceText: 'Handoff complete. Patient wheeled to ED trauma bay at 14:31.' },
+    // ── EMERGENCY DEPT — Visit 1 ───────────────────────────────────────────
     { id: 'tl8',       location: 'Emergency Dept', what: 'Admission',         when: '2024-06-07 14:32', description: 'Room TR-04 · Bed TR-04 · Patient Class: Emergency · Service: Emergency Medicine (Non-admitting)', who: 'R. Thompson', sourceText: 'Patient registered and admitted to ED Trauma Bay TR-04 at 14:32.' },
     { id: 'tl9',       location: 'Emergency Dept', what: 'Vitals',            when: '2024-06-07 14:35', description: 'Temp 36.8 °C · HR 89 · Resp 18 · BP 137/92 · MAP 105 mmHg · SpO2 99% · BP Location: Left arm · Method: Automatic', who: 'R. Thompson', sourceText: 'Initial ED vitals obtained at 14:35 per trauma protocol.' },
     { id: 'tl10',      location: 'Emergency Dept', what: 'Pain Screening',    when: '2024-06-07 14:36', description: 'Pain Assessment Scale: Verbal Analog (0–10) · Score: 9/10 · Location: Chest and arm', who: 'R. Thompson', sourceText: 'Pain assessment documented per nursing flowsheet.' },
@@ -457,17 +508,20 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     { id: 'tl_ct_ord', location: 'Emergency Dept', what: 'CT Ordered',        when: '2024-06-07 15:05', description: 'CT Pulmonary Angiography — STAT · Indication: chest trauma, tachycardia, shortness of breath · Contrast: IV iodinated · Priority: STAT', who: 'Dr. Smith', sourceText: 'CT-PA ordered STAT by Dr. Smith at 15:05 for evaluation of pulmonary embolism.' },
     { id: 'tl12',      location: 'Emergency Dept', what: 'Hospital Event',    when: '2024-06-07 15:45', description: 'Pulmonary Embolism (PE) — identified on CT pulmonary angiography', who: 'Dr. Smith', sourceText: 'CT-PA read by radiology at 15:45. Attending notified. Anticoagulation protocol initiated.' },
     { id: 'tl13',      location: 'Emergency Dept', what: 'Transfer Out',      when: '2024-06-07 16:00', description: 'Transfer to OR for emergency surgery', who: 'Dr. Smith', sourceText: 'Patient transferred to OR at 16:00. Escort by trauma RN and attending.' },
+    // ── OR — Visit 1 ───────────────────────────────────────────────────────
     { id: 'tl14',      location: 'OR',             what: 'Transfer In',       when: '2024-06-07 16:05', description: 'Room: OR-2 · Bed: OR-2 · Patient Class: Emergency · Level of Care: ICU · Service: Emergency Medicine', who: 'OR Charge Nurse', sourceText: 'Patient received in OR at 16:05. Anesthesia team present.' },
     { id: 'tl15',      location: 'OR',             what: 'Vitals',            when: '2024-06-07 16:10', description: 'Temp 36.8 °C · HR 89 · Resp 18 (ventilated) · BP 137/92 · MAP 105 mmHg · SpO2 99% · Method: Arterial line', who: 'Dr. Patel', sourceText: 'Intraoperative vitals obtained at time of incision.' },
     { id: 'tl16',      location: 'OR',             what: 'Transfusion',       when: '2024-06-07 16:20', description: 'Fresh Frozen Plasma (FFP) transfusion initiated · Anesthesia barcode verified', who: 'Dr. Patel', sourceText: 'FFP transfusion per massive transfusion protocol. Barcode verification completed.' },
     { id: 'tl17',      location: 'OR',             what: 'Medication',        when: '2024-06-07 16:25', description: 'Phenylephrine (Neo-Synephrine) 1000 mcg/10 mL syringe · Dose: 100 mcg · Route: Intravenous', who: 'Dr. Patel', sourceText: 'Vasopressor administered for intraoperative hypotension.' },
     { id: 'tl18',      location: 'OR',             what: 'Procedures',        when: '2024-06-07 17:30', description: '1. Excisional debridement posterior arm musculature (triceps) 5 cm x 2 cm x 4 cm deep\n2. Delayed primary closure dorsal arm wound — complex closure in layers\n3. Excisional debridement anterior arm compartment — brachial artery exploration\n4. Wound VAC anterior arm musculature 10 cm x 6 cm x 5 cm deep\n5. Nonexcisional debridement + wound VAC volar forearm wound 25 x 8 cm', who: 'Dr. Thompson · Dr. Lee', sourceText: 'Operative report dictated by Dr. Thompson. Procedure start 17:30, end 19:15.' },
     { id: 'tl19',      location: 'OR',             what: 'Transfer Out',      when: '2024-06-07 19:20', description: 'Transfer to PACU — post-operative, hemodynamically stable', who: 'Dr. Thompson', sourceText: 'Patient transferred from OR to PACU at 19:20. Handoff completed.' },
+    // ── PACU — Visit 1 ─────────────────────────────────────────────────────
     { id: 'tl20',      location: 'PACU',           what: 'Transfer In',       when: '2024-06-07 19:25', description: 'Room: GHS PACU Pool · Bed: PACU-3 · Patient Class: Observation/OP · Level of Care: Acute (Med Surg) · Service: Orthopedics', who: 'M. Chen', sourceText: 'Patient received in PACU at 19:25. PACU protocol initiated.' },
     { id: 'tl21',      location: 'PACU',           what: 'LDA',               when: '2024-06-07 19:35', description: 'Peripheral IV — 20 G · Right Antecubital · Placed: Jun 7, 2024 19:35 · Assessed and patent', who: 'M. Chen', sourceText: 'LDA assessment per PACU nursing flowsheet.' },
     { id: 'tl22',      location: 'PACU',           what: 'O2 Therapy',        when: '2024-06-07 19:40', description: 'SpO2: 95% · O2 Device: Standby at bedside · No active O2 delivery required at this time', who: 'M. Chen', sourceText: 'Oxygen therapy assessment per PACU protocol.' },
     { id: 'tl23',      location: 'PACU',           what: 'Medication',        when: '2024-06-07 20:00', description: 'Lactated Ringers (LR) IV Fluid · New Bag · Rate: 100 mL/hr · Route: Intravenous', who: 'M. Chen', sourceText: 'IV fluid management per post-op orders.' },
     { id: 'tl_p1_out', location: 'PACU',           what: 'Transfer Out',      when: '2024-06-08 10:00', description: 'Transfer to GHS 4B MedSurg — stable for step-down care', who: 'M. Chen', sourceText: 'Patient cleared for step-down by attending at 10:00. Transferred to Med Surg floor.' },
+    // ── GHS 4B MEDSURG ─────────────────────────────────────────────────────
     { id: 'tl_ms1',    location: 'GHS 4B MedSurg', what: 'Transfer In',       when: '2024-06-08 10:30', description: 'Room: GHS 4B · Bed: 412B · Patient Class: Inpatient · Level of Care: Acute (Med Surg) · Service: Orthopedics', who: 'C. Reyes', sourceText: 'Patient received on 4B MedSurg floor at 10:30. Nursing handoff completed.' },
     { id: 'tl_ms2',    location: 'GHS 4B MedSurg', what: 'Medication',        when: '2024-06-08 12:00', description: 'Oxycodone 5 mg PO · PRN Pain · Administered per order', who: 'C. Reyes', sourceText: 'Medication administered per nursing flowsheet.' },
     { id: 'tl_ms3',    location: 'GHS 4B MedSurg', what: 'Pain Screening',    when: '2024-06-08 14:00', description: 'Pain Assessment Scale: Verbal Analog (0-10) · Score: 7/10 · Location: Anterior arm wound', who: 'C. Reyes', sourceText: 'Pain assessment documented per nursing flowsheet at 14:00.' },
@@ -475,18 +529,21 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     { id: 'tl_ms5',    location: 'GHS 4B MedSurg', what: 'Vitals',            when: '2024-06-09 10:00', description: 'Temp 36.9 °C · HR 78 · Resp 16 · BP 128/82 · SpO2 98% · Pain 3/10', who: 'C. Reyes', sourceText: 'Morning vitals obtained at 10:00 by nursing staff.' },
     { id: 'tl_ms6',    location: 'GHS 4B MedSurg', what: 'Vitals',            when: '2024-06-09 14:00', description: 'Temp 37.2 °C · HR 94 · Resp 18 · BP 128/84 · SpO2 98% · Pain 6/10', who: 'C. Reyes', sourceText: 'Routine vitals per floor protocol. Attending notified of elevated HR.' },
     { id: 'tl_ms_out', location: 'GHS 4B MedSurg', what: 'Transfer Out',      when: '2024-06-10 08:00', description: 'Transfer to Emergency Dept — wound dehiscence and signs of infection', who: 'Dr. Williams', sourceText: 'Patient reported increased wound drainage and erythema at 07:30. Transfer to ED ordered.' },
+    // ── EMERGENCY DEPT — Visit 2 (Readmission) ─────────────────────────────
     { id: 'tl_ed2_1',  location: 'Emergency Dept', what: 'Transfer In',       when: '2024-06-10 08:30', description: 'Readmission — Room TR-02 · Bed TR-02 · Patient Class: Emergency · Service: Trauma Surgery', who: 'R. Thompson', sourceText: 'Patient readmitted to ED at 08:30 for wound complication evaluation.' },
     { id: 'tl_ct_perf',location: 'Emergency Dept', what: 'CT Performed',      when: '2024-06-10 08:35', description: 'CT Chest/Abdomen/Pelvis — STAT · Patient transported to radiology suite · Contrast: IV · Scan duration: 12 min · Images transmitted to radiologist on call', who: 'Radiology Tech', sourceText: 'CT performed at 08:35. Patient escorted by ED nurse. Images available for read at 08:52.' },
     { id: 'tl_ed2_2',  location: 'Emergency Dept', what: 'Vitals',            when: '2024-06-10 08:45', description: 'Temp 38.4 °C (febrile) · HR 108 · Resp 20 · BP 118/76 · SpO2 96% · Pain 8/10', who: 'R. Thompson', sourceText: 'Vitals on readmission. Fever and tachycardia consistent with infection.' },
     { id: 'tl_ed2_3',  location: 'Emergency Dept', what: 'Labs',              when: '2024-06-10 09:00', description: 'CBC: WBC 14.2 x10/uL (elevated) · Hgb 9.8 · Plt 210 · CRP 48 mg/L — consistent with wound infection', who: 'Point of Care', sourceText: 'Labs drawn at 09:00. Results at 09:42. Reviewed by Dr. Smith.' },
     { id: 'tl_ed2_4',  location: 'Emergency Dept', what: 'Hospital Event',    when: '2024-06-10 10:00', description: 'Wound dehiscence and superficial infection — anterior arm wound · Wound culture obtained · Antibiotics broadened', who: 'Dr. Smith', sourceText: 'Wound assessed by Dr. Smith. Culture swab taken. ID consult placed.' },
     { id: 'tl_ed2_out',location: 'Emergency Dept', what: 'Transfer Out',      when: '2024-06-10 11:00', description: 'Transfer to OR for wound washout and revision', who: 'Dr. Smith', sourceText: 'OR notified at 10:45. Patient transferred at 11:00.' },
+    // ── OR — Visit 2 ───────────────────────────────────────────────────────
     { id: 'tl_or2_1',  location: 'OR',             what: 'Transfer In',       when: '2024-06-10 11:30', description: 'Room: OR-4 · Bed: OR-4 · Patient Class: Emergency · Service: Trauma Surgery', who: 'OR Charge Nurse', sourceText: 'Patient received in OR-4 at 11:30. Anesthesia and surgical team present.' },
     { id: 'tl_ct_res', location: 'OR',             what: 'CT Result',         when: '2024-06-10 11:35', description: 'CT Chest/Abdomen/Pelvis — Wound dehiscence confirmed · Soft tissue gas anterior arm consistent with infection · No pneumothorax · Pulmonary emboli partially resolved', who: 'Dr. Williams', sourceText: 'CT read by radiology. Report transmitted to OR team at 11:35. Dr. Thompson reviewed prior to incision.' },
     { id: 'tl_or2_2',  location: 'OR',             what: 'Vitals',            when: '2024-06-10 11:45', description: 'Temp 38.1 °C · HR 102 · Resp 16 (ventilated) · BP 122/78 · MAP 93 mmHg · SpO2 99%', who: 'Dr. Patel', sourceText: 'Intraoperative vitals at time of prep. Temp trending down from pre-op.' },
     { id: 'tl_or2_3',  location: 'OR',             what: 'Procedures',        when: '2024-06-10 12:00', description: '1. Wound washout and irrigation anterior arm — 3 L normal saline\n2. Excisional debridement infected tissue — anterior arm 3 cm x 2 cm\n3. Wound VAC replacement\n4. Culture specimens sent to microbiology', who: 'Dr. Thompson · Dr. Lee', sourceText: 'Operative report by Dr. Thompson. Procedure start 12:00, end 13:45.' },
     { id: 'tl_or2_4',  location: 'OR',             what: 'Medication',        when: '2024-06-10 12:30', description: 'Piperacillin-Tazobactam 3.375 g IV · Intraoperative antibiotic coverage · Single dose', who: 'Dr. Patel', sourceText: 'Antibiotic per ID recommendation. Administered at incision time.' },
     { id: 'tl_or2_out',location: 'OR',             what: 'Transfer Out',      when: '2024-06-10 14:00', description: 'Transfer to PACU — procedure complete, hemodynamically stable', who: 'Dr. Thompson', sourceText: 'Patient transferred from OR to PACU at 14:00. Handoff to M. Chen.' },
+    // ── PACU — Current ─────────────────────────────────────────────────────
     { id: 'tl_p2_1',   location: 'PACU',           what: 'Transfer In',       when: '2024-06-10 14:30', description: 'Room: GHS PACU Pool · Bed: PACU-5 · Patient Class: Observation/OP · Level of Care: Acute (Med Surg) · Service: Orthopedics', who: 'M. Chen', sourceText: 'Patient received in PACU at 14:30. PACU protocol initiated.' },
     { id: 'tl_p2_2',   location: 'PACU',           what: 'LDA',               when: '2024-06-10 14:45', description: 'Peripheral IV — 18 G · Left Antecubital · Placed: Jun 10, 2024 14:45 · Assessed and patent', who: 'M. Chen', sourceText: 'LDA assessment per PACU nursing flowsheet.' },
     { id: 'tl_p2_3',   location: 'PACU',           what: 'O2 Therapy',        when: '2024-06-10 15:00', description: 'SpO2: 97% · O2 Device: 2 L nasal cannula · Weaning to room air as tolerated', who: 'M. Chen', sourceText: 'Oxygen therapy per PACU protocol. Weaning initiated at 15:30.' },
@@ -562,6 +619,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
       return `${fullMonths[d.getMonth()]} ${day}${suffix}, ${d.getFullYear()}`;
     };
 
+    // Build all groups from ALL events (used for transfer context when location filter is on)
     const allSorted = [...tlEvents].sort((a, b) => b.when.localeCompare(a.when));
     const allGroups: { location: string; events: TLEvent[] }[] = [];
     allSorted.forEach(e => {
@@ -574,6 +632,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     const isInlineLocation = variant === 'inline-location';
     const isDateFirst = variant === 'date-first' || isInlineLocation;
 
+    // Event-level filters (what, who, when, search) applied to events within a group
     const passesEventFilters = (e: TLEvent) => {
       if (filterWhat) {
         const matchesCT = filterWhat === 'CT' && CT_WHATS.has(e.what);
@@ -586,6 +645,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
       return true;
     };
 
+    // Build render items — either plain groups or location-filtered groups with intermediate transfers
     type RenderGroup = { type: 'group'; location: string; events: TLEvent[] };
     type RenderTransfers = { type: 'transfers'; transfers: { location: string; event: TLEvent }[] };
     type RenderDay = { type: 'day'; label: string; key: string };
@@ -594,9 +654,11 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     let renderItems: RenderItem[] = [];
 
     if (filterWhere) {
+      // Find all allGroups matching the location filter
       const matchIndices = allGroups.map((g, i) => g.location === filterWhere ? i : -1).filter(i => i >= 0);
 
       matchIndices.forEach((gi, rank) => {
+        // Events in this group, applying event-level filters (exclude Transfer Out from body)
         const bodyEvents = allGroups[gi].events.filter(e => e.what !== 'Transfer Out' && passesEventFilters(e));
         const transferOut = allGroups[gi].events.find(e => e.what === 'Transfer Out');
         const eventsWithTO = transferOut ? [...bodyEvents, transferOut] : bodyEvents;
@@ -605,6 +667,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
           renderItems.push({ type: 'group', location: filterWhere, events: allGroups[gi].events });
         }
 
+        // Between this group and the next matching group, collect intermediate Transfer Outs
         if (rank < matchIndices.length - 1) {
           const nextGi = matchIndices[rank + 1];
           const intermediate: { location: string; event: TLEvent }[] = [];
@@ -616,6 +679,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
         }
       });
     } else {
+      // No location filter — apply all filters normally and group
       const filtered = tlEvents.filter(passesEventFilters);
       const sorted = [...filtered].sort((a, b) => b.when.localeCompare(a.when));
       const grouped: { location: string; events: TLEvent[] }[] = [];
@@ -627,6 +691,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
       renderItems = grouped.map(g => ({ type: 'group' as const, location: g.location, events: g.events }));
     }
 
+    // Inject sticky day-header separators between groups from different calendar days
     {
       const withDays: RenderItem[] = [];
       let currentDayKey = '';
@@ -663,11 +728,13 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
           )}
         </div>
 
+        {/* Filters */}
         <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex flex-wrap gap-3 items-end">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-widest mr-1">
             <Filter size={11} /> Filter by
           </div>
 
+          {/* When */}
           <div className="flex items-center gap-1.5">
             <input type="date" value={filterWhenStart} onChange={e => setFilterWhenStart(e.target.value)}
               className="text-xs px-2 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 w-32" />
@@ -676,12 +743,14 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
               className="text-xs px-2 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 w-32" />
           </div>
 
+          {/* What */}
           <select value={filterWhat} onChange={e => setFilterWhat(e.target.value)}
             className="text-xs px-2 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white text-gray-700 w-40">
             <option value="">All labels</option>
             {ALL_WHATS.map(w => <option key={w}>{w}</option>)}
           </select>
 
+          {/* Description */}
           <div className="flex items-center gap-1 px-2 py-1.5 border border-gray-200 rounded-md bg-white focus-within:ring-1 focus-within:ring-teal-400 w-48">
             <Search size={11} className="text-gray-300 flex-shrink-0" />
             <input
@@ -698,32 +767,38 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
             )}
           </div>
 
+          {/* Who */}
           <select value={filterWho} onChange={e => setFilterWho(e.target.value)}
             className="text-xs px-2 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white text-gray-700 w-44">
             <option value="">All people</option>
             {ALL_WHOS.map(w => <option key={w}>{w}</option>)}
           </select>
 
+          {/* Where */}
           <select value={filterWhere} onChange={e => setFilterWhere(e.target.value)}
             className="text-xs px-2 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white text-gray-700 w-36">
             <option value="">All locations</option>
             {ALL_LOCATIONS.map(l => <option key={l}>{l}</option>)}
           </select>
         </div>
-        </div>
+        </div>{/* end flex-shrink-0 */}
 
+        {/* Timeline — scrollable */}
         <div className="flex-1 overflow-y-auto min-h-0 pb-4">
         {renderItems.length === 0 ? (
           <div className="text-center py-12 text-sm text-gray-400">No events match the current filters.</div>
         ) : (
           <div className="flex gap-0 relative">
+            {/* Absolute spine — runs full height through every dot */}
             <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-gray-200 z-0" />
+            {/* Spacer to preserve left offset */}
             <div className="w-8 flex-shrink-0" />
 
             <div className="flex-1 flex flex-col gap-3 min-w-0">
               {renderItems.map((item, ri) => {
                 const isLast = ri === renderItems.length - 1;
 
+                /* ── Day header ── */
                 if (item.type === 'day') {
                   return (
                     <div key={`day-${item.key}`} className="sticky top-0 z-20 -ml-8 bg-gray-50/95 backdrop-blur-sm">
@@ -735,6 +810,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                   );
                 }
 
+                /* ── Intermediate transfer chain (between filtered location visits) ── */
                 if (item.type === 'transfers') {
                   return (
                     <div key={`transfers-${ri}`} className="flex flex-col gap-1.5 -ml-8 pl-8">
@@ -742,6 +818,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                         const locStyle = LOCATION_STYLES[location] ?? { label: 'bg-gray-500' };
                         return (
                           <div key={event.id} className="flex items-center gap-0">
+                            {/* Spine: mini-carrot for inline-location, dot otherwise */}
                             <div className="flex flex-col items-center w-8 flex-shrink-0 -ml-8">
                               {isInlineLocation ? (
                                 <div className="w-0 h-0 flex-shrink-0 z-10" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderLeft: '13px solid #f97316' }} />
@@ -749,7 +826,9 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                                 <div className={`w-3 h-3 rounded-full ${locStyle.label} ring-2 ring-white flex-shrink-0 z-10 opacity-70`} />
                               )}
                             </div>
+                            {/* Transfer Out arrow */}
                             {isInlineLocation ? (
+                              /* Fit-content banner matching bubble Transfer Out style */
                               <div className="flex items-center">
                                 <div className="w-0 h-0 flex-shrink-0" style={{ borderTop: '14px solid transparent', borderBottom: '14px solid transparent', borderLeft: '11px solid #f97316' }} />
                                 <div className="flex items-center gap-2 bg-orange-400 pl-3 pr-5 py-1.5" style={{ clipPath: 'polygon(0 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 0 100%)', width: 'fit-content' }}>
@@ -763,6 +842,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                               </div>
                             ) : (
                               <>
+                                {/* Location chip */}
                                 <div className={`flex items-center gap-1 ${locStyle.label} px-2 py-1 rounded-md opacity-80 flex-shrink-0`}>
                                   <MapPin size={9} className="text-white/80 flex-shrink-0" />
                                   <span className="text-[10px] font-bold text-white tracking-wide uppercase">{location}</span>
@@ -783,6 +863,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                   );
                 }
 
+                /* ── Normal location group ── */
                 const group = item;
                 const locStyle = LOCATION_STYLES[group.location] ?? { bg: 'bg-gray-50', border: 'border-gray-200', label: 'bg-gray-500' };
                 const transferOut = group.events.find(e => e.what === 'Transfer Out');
@@ -790,12 +871,16 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
 
                 return (
                   <div key={`${group.location}-${ri}`} className="flex flex-col">
+
+                    {/* Location header + inline Transfer Out arrow */}
                     <div className="flex items-center gap-0 -ml-8 mb-2 flex-wrap">
+                      {/* Spine marker: mini-carrot for Transfer Out, nothing otherwise */}
                       <div className="flex flex-col items-center w-8 flex-shrink-0">
                         {isInlineLocation && transferOut && (
                           <div className="w-0 h-0 flex-shrink-0 z-10" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderLeft: '13px solid #f97316' }} />
                         )}
                       </div>
+                      {/* In inline-location variant, omit the department name chip */}
                       {!isInlineLocation && (
                         <div className={`flex items-center gap-2 ${locStyle.label} px-3 py-1.5 rounded-lg flex-shrink-0`}>
                           <MapPin size={11} className="text-white/80 flex-shrink-0" />
@@ -822,6 +907,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                       )}
                     </div>
 
+                    {/* Events bubble */}
                     {bodyEvents.length > 0 && (
                       <div className={`-ml-8 rounded-xl ${isInlineLocation ? `border ${locStyle.border}` : `border-2 ${locStyle.border}`} ${locStyle.bg} overflow-hidden`}>
                         <div className="pl-[8px] pr-4 py-3 flex flex-col gap-4">
@@ -883,6 +969,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
                                           Source
                                         </button>
                                       )}
+                                      {/* Location tag — Timeline 3 only, right side after attribution */}
                                       {isInlineLocation && (
                                         <div className={`flex items-center gap-1 ${locStyle.label} px-1.5 py-0.5 rounded flex-shrink-0`}>
                                           <span className="text-[9px] font-bold text-white tracking-wide uppercase leading-none">{group.location}</span>
@@ -905,8 +992,9 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
             </div>
           </div>
         )}
-        </div>
+        </div>{/* end scrollable timeline */}
 
+        {/* Source popup */}
         {sourcePopup && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
             <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-lg w-full mx-4">
@@ -927,6 +1015,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
 
   const activeGuidelines = mockGuidelines.filter(g => activeGuidelineIds.has(g.id));
 
+  // ── Render: Guidelines Overview ─────────────────────────────────────────────
   const renderGuidelinesOverview = () => (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
@@ -955,6 +1044,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
         ))}
       </div>
 
+      {/* Dismiss confirmation dialog */}
       {dismissConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm w-full mx-4">
@@ -988,6 +1078,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     </div>
   );
 
+  // ── Render: Registry tab placeholder ────────────────────────────────────────
   const renderRegistryTab = (tabId: string, tabLabel: string) => {
     const Icon = registryCategoryIcons[tabId] || FileText;
     return (
@@ -1025,6 +1116,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     );
   };
 
+  // ── Render: Care Guidelines (horizontal tabs version) ──────────────────────
   const renderGuidelinesHTabs = (activeId: string) => {
     const tabs = [
       { id: 'overview', label: 'Overview', acronym: 'Overview', worst: 'green' as const },
@@ -1045,6 +1137,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
       <div className="flex flex-col gap-2">
         <h2 className="text-xl font-semibold text-gray-900">Care Guidelines</h2>
 
+        {/* Horizontal tab strip + Add button */}
         <div className="flex flex-wrap gap-0 border-b border-gray-200 -mt-2 items-end">
           {tabs.map(tab => {
             const isActive = tab.id === activeId;
@@ -1079,6 +1172,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
             );
           })}
 
+          {/* + Add button */}
           <div ref={addDropdownRef} className="relative mb-0.5 ml-1">
             <button
               onClick={() => { setAddSearchOpen(v => !v); setAddSearchQuery(''); }}
@@ -1126,6 +1220,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
           </div>
         </div>
 
+        {/* Tab content */}
         {activeId === 'overview'
           ? renderGuidelinesOverview()
           : activeGuideline
@@ -1139,6 +1234,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
             />
             : null}
 
+        {/* Dismiss confirmation dialog */}
         {dismissConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
             <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm w-full mx-4">
@@ -1184,9 +1280,11 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
     variant: 'inline-location',
   });
 
+  // ── Render: main content ────────────────────────────────────────────────────
   const renderContent = () => {
     if (activeView.type === 'timeline3') return renderTimeline3();
     if (activeView.type === 'pips') return renderPIPS();
+    if (activeView.type === 'pips2') return renderPIPS2();
     if (activeView.type === 'guidelines-htabs') return renderGuidelinesHTabs(activeView.activeId);
     if (activeView.type === 'registry') return renderRegistryTab(activeView.tabId, activeView.tabLabel);
     return null;
@@ -1197,10 +1295,11 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
       <PatientHeader patient={patient} onBackToList={onBackToList} />
 
       <div className="flex flex-1 overflow-hidden">
+        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
         <aside className={`${navCollapsed ? 'w-12' : 'w-44'} bg-white border-r border-teal-200 flex-shrink-0 flex flex-col overflow-y-auto transition-all duration-200`}>
           <div className="flex flex-col py-2">
 
-            {/* Care Guidelines */}
+            {/* Care Guidelines — horizontal tabs */}
             <button
               onClick={() => setActiveView({ type: 'guidelines-htabs', activeId: 'overview' })}
               title={navCollapsed ? 'Care Guidelines' : undefined}
@@ -1220,7 +1319,17 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
               {!navCollapsed && <span className="flex-1 leading-tight">PIPS</span>}
             </button>
 
-            {/* Timeline */}
+            {/* PIPS 2 */}
+            <button
+              onClick={() => setActiveView({ type: 'pips2' })}
+              title={navCollapsed ? 'PIPS 2' : undefined}
+              className={navBtnCls(activeView.type === 'pips2')}
+            >
+              <ChartLine className="w-4 h-4 flex-shrink-0" />
+              {!navCollapsed && <span className="flex-1 leading-tight">PIPS 2</span>}
+            </button>
+
+            {/* Patient Timeline */}
             <button
               onClick={() => setActiveView({ type: 'timeline3' })}
               title={navCollapsed ? 'Timeline' : undefined}
@@ -1267,7 +1376,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
               )}
             </div>
 
-            {/* I.R.I.S. */}
+            {/* I.R.I.S. floating below last tab */}
             <div className={`pt-3 pb-1 ${navCollapsed ? 'px-1' : 'px-3'}`}>
               <button
                 onClick={() => setIrisOpen(v => !v)}
@@ -1290,6 +1399,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
           </div>
         </aside>
 
+        {/* ── I.R.I.S. Panel ───────────────────────────────────────────────── */}
         {irisOpen && (
           <IRISChat
             key={irisKey}
@@ -1300,6 +1410,7 @@ export function PIPatientRecord({ patient, onBackToList, initialView }: PIPatien
           />
         )}
 
+        {/* ── Main content ─────────────────────────────────────────────────── */}
         <main className={`flex-1 ${activeView.type === 'timeline3' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`}>
           <div className={`px-4 py-2 ${activeView.type === 'timeline3' ? 'flex-1 overflow-hidden flex flex-col' : ''}`}>
             {renderContent()}

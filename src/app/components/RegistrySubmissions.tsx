@@ -49,7 +49,7 @@ export function RegistrySubmissions() {
         </div>
         <div className="grid grid-cols-3 gap-4">
           {CARDS.map(({ icon: Icon, title, desc, badge }) => (
-            <div key={title} className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3 hover:border-red-200 hover:shadow-sm transition-all cursor-pointer">
+            <div key={title} className="bg-white rounded-xl border border-red-100 p-5 flex flex-col gap-3 hover:bg-red-50/20 transition-all cursor-pointer">
               <div className="flex items-start justify-between gap-2">
                 <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
                   <Icon size={15} className="text-red-600" />

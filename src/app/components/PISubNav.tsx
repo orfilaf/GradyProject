@@ -1,9 +1,10 @@
-import { Home } from 'lucide-react';
+import { Home, ClipboardList } from 'lucide-react';
 
-export type PISection = 'home';
+export type PISection = 'home' | 'pips';
 
 const PI_TABS = [
-  { id: 'home' as PISection, label: 'Home', icon: Home },
+  { id: 'home' as PISection, label: 'Home',       icon: Home          },
+  { id: 'pips' as PISection, label: 'PIPS Cases', icon: ClipboardList },
 ];
 
 interface PISubNavProps {

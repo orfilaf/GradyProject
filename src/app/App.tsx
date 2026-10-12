@@ -11,6 +11,7 @@ import { RegistryReports } from './components/RegistryReports';
 import { RegistryDictionary } from './components/RegistryDictionary';
 import { RegistryAdmin } from './components/RegistryAdmin';
 import { PISubNav, PISection } from './components/PISubNav';
+import { PIPSSection } from './components/PIPSSection';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -46,6 +47,11 @@ export default function App() {
     if (section !== 'home' && section !== 'cases') setSelectedPatient(null);
   };
 
+  const handlePISection = (section: PISection) => {
+    setPiSection(section);
+    if (section !== 'home' && section !== 'pips') setSelectedPatient(null);
+  };
+
   return (
     <div className="size-full flex flex-col">
       <Navigation
@@ -57,7 +63,7 @@ export default function App() {
         <RegistrySubNav active={registrySection} onChange={handleRegistrySection} />
       )}
       {activeModule === 'pi' && (
-        <PISubNav active={piSection} onChange={setPiSection} />
+        <PISubNav active={piSection} onChange={handlePISection} />
       )}
       <div className="flex-1 overflow-y-auto flex flex-col">
         {activeModule === 'hub' ? (
@@ -83,17 +89,25 @@ export default function App() {
                   : registrySection === 'admin'
                     ? <RegistryAdmin />
                     : null
-        ) : (
-          selectedPatient ? (
-            <PIPatientRecord
-              patient={selectedPatient}
-              onBackToList={handleBackToList}
-              initialView={piInitialView === 'guidelines' ? { type: 'guidelines-htabs', activeId: 'overview' } : { type: 'timeline3' }}
-            />
-          ) : (
-            <PIPatientList onPatientSelect={handlePatientSelect} />
-          )
-        )}
+        ) : activeModule === 'pi' ? (
+          piSection === 'home'
+            ? selectedPatient
+              ? <PIPatientRecord
+                  patient={selectedPatient}
+                  onBackToList={handleBackToList}
+                  initialView={piInitialView === 'guidelines' ? { type: 'guidelines-htabs', activeId: 'overview' } : { type: 'timeline3' }}
+                />
+              : <PIPatientList onPatientSelect={handlePatientSelect} />
+            : piSection === 'pips'
+              ? selectedPatient
+                ? <PIPatientRecord
+                    patient={selectedPatient}
+                    onBackToList={handleBackToList}
+                    initialView={{ type: 'pips' }}
+                  />
+                : <PIPSSection onPatientSelect={handlePatientSelect} />
+              : null
+        ) : null}
       </div>
     </div>
   );

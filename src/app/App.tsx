@@ -35,6 +35,11 @@ export default function App() {
     setActiveModule(module);
   };
 
+  const handleRegistrySection = (section: RegistrySection) => {
+    setRegistrySection(section);
+    if (section !== 'home' && section !== 'cases') setSelectedPatient(null);
+  };
+
   return (
     <div className="size-full flex flex-col">
       <Navigation
@@ -43,7 +48,7 @@ export default function App() {
         onBackToList={selectedPatient ? handleBackToList : undefined}
       />
       {activeModule === 'registry' && (
-        <RegistrySubNav active={registrySection} onChange={setRegistrySection} />
+        <RegistrySubNav active={registrySection} onChange={handleRegistrySection} />
       )}
       <div className="flex-1 overflow-y-auto flex flex-col">
         {activeModule === 'hub' ? (
@@ -53,11 +58,14 @@ export default function App() {
             <PatientList onPatientSelect={handlePatientSelect} />
           )
         ) : activeModule === 'registry' ? (
-          selectedPatient ? (
-            <PatientRecord patient={selectedPatient} onBackToList={handleBackToList} />
-          ) : (
-            <PatientList onPatientSelect={handlePatientSelect} showDashboard />
-          )
+          (registrySection === 'home' || registrySection === 'cases')
+            ? selectedPatient
+              ? <PatientRecord patient={selectedPatient} onBackToList={handleBackToList} />
+              : <PatientList
+                  onPatientSelect={handlePatientSelect}
+                  showDashboard={registrySection === 'home'}
+                />
+            : null
         ) : (
           selectedPatient ? (
             <PIPatientRecord

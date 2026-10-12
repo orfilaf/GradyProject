@@ -13,6 +13,7 @@ import { RegistryAdmin } from './components/RegistryAdmin';
 import { PISubNav, PISection } from './components/PISubNav';
 import { PIPSSection } from './components/PIPSSection';
 import { PIDashboard } from './components/PIDashboard';
+import { PIReports } from './components/PIReports';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -109,7 +110,9 @@ export default function App() {
                 : <PIPSSection onPatientSelect={handlePatientSelect} />
               : piSection === 'dashboard'
                 ? <PIDashboard />
-                : null
+                : piSection === 'reports'
+                  ? <PIReports />
+                  : null
         ) : null}
       </div>
     </div>

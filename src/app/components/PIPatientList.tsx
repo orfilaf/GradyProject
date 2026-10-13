@@ -3,7 +3,7 @@ import { ChevronUp, ChevronDown, ChevronsUpDown, UserCheck, ChevronRight, Bot, S
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { IRISChat } from './IRISChat';
 
-// ── Table ──────────────────────────────────────────────────────────────────────────────────
+// ── Table ─────────────────────────────────────────────────────────────────────────────────
 
 type ReviewStage = 'Primary' | 'Secondary' | 'M&M' | 'TPRC' | '';
 
@@ -69,8 +69,90 @@ const patients: Patient[] = [
   { id: '5', mrn: 'MRN-2024-001238', name: 'Robert Williams', traumaNumber: 'TN-24-0895', hospitalAccountNumber: 'HA-884425', arrived: '2024-06-08 13:00', discharged: '',                mechanism: 'Pedestrian vs Auto',  activation: 'Level 2', ntdb: 'Yes', piAssigned: 'Sarah Williams', openFlags: 2, guidelines: [{ name: 'Traumatic Brain Injury', acronym: 'TBI', status: 'red' }, { name: 'Geriatric Trauma', acronym: 'Ger.', status: 'amber' }, { name: 'Spinal Cord Injury', acronym: 'SCI', status: 'green' }], status: 'In Progress', review: 'TPRC',      age: 81, sex: 'Male',   hospital: 'Mercy Hospital',   level: 'Level 2', iss: 17, triss: 7.8, niss: 22, admitService: 'Trauma Surgery',     by: 'Dr. Smith',    left: '',                    los: 'Inpatient',  rc: 'Michael Chen', pi: 'Sarah Williams', rcNurse: 'Michael Chen', caseSummary: '81-year-old male struck by vehicle while crossing intersection. Sustained multiple rib fractures (bilateral), splenic laceration grade II, and right femur fracture. Anticoagulated for atrial fibrillation.\n\nSplenic laceration managed non-operatively with angioembolization. Right femur ORIF performed day 2. Anticoagulation held peri-procedure.\n\nDelirium developed day 3, managed with reorientation protocol. Prolonged ICU course. Referred to TPRC given complexity and extended LOS.' },
 ];
 
+// ── Dashboard constants ─────────────────────────────────────────────────────────────────────
+
+type FlagStatus = 'green' | 'amber' | 'red';
+interface GuidelinePatient { name: string; status: FlagStatus; }
+interface GuidelineBubbleData { name: string; acronym: string; patients: GuidelinePatient[]; }
+
+const STATUS_ICON: Record<FlagStatus, string> = { green: '✅', amber: '⚠️', red: '‼️' };
+
+const reviewCounts = [
+  { label: '1st Review', filterValue: 'Primary',   count: 12, color: 'bg-blue-50 border-blue-200 text-blue-700',         activeColor: 'bg-blue-100 border-blue-400 text-blue-800 ring-2 ring-blue-400' },
+  { label: '2nd Review', filterValue: 'Secondary', count: 7,  color: 'bg-amber-50 border-amber-300 text-amber-700',       activeColor: 'bg-amber-100 border-amber-500 text-amber-800 ring-2 ring-amber-400' },
+  { label: 'M&M',        filterValue: 'M&M',       count: 4,  color: 'bg-red-50 border-red-200 text-red-700',             activeColor: 'bg-red-100 border-red-400 text-red-800 ring-2 ring-red-400' },
+  { label: 'TPR',        filterValue: 'TPRC',      count: 9,  color: 'bg-emerald-50 border-emerald-200 text-emerald-700', activeColor: 'bg-emerald-100 border-emerald-400 text-emerald-800 ring-2 ring-emerald-400' },
+];
+
+const guidelinesRow1: GuidelineBubbleData[] = [
+  { name: 'Traumatic Brain Injury',  acronym: 'TBI',       patients: [{ name: 'John Anderson', status: 'red' }, { name: 'Maria Garcia', status: 'amber' }, { name: 'David Johnson', status: 'green' }, { name: 'Robert Williams', status: 'red' }] },
+  { name: 'Geriatric Trauma',        acronym: 'Geriatric', patients: [{ name: 'Sarah Kim', status: 'amber' }, { name: 'Linda Martinez', status: 'green' }, { name: 'Harold Brown', status: 'amber' }] },
+  { name: 'Vascular Access Trauma',  acronym: 'VAT',       patients: [{ name: 'James Wilson', status: 'green' }, { name: 'Patricia Lee', status: 'green' }] },
+  { name: 'Acute Kidney Injury',     acronym: 'AKI',       patients: [{ name: 'Charles Davis', status: 'red' }, { name: 'Barbara Taylor', status: 'amber' }, { name: 'William Anderson', status: 'green' }, { name: 'Susan Thomas', status: 'amber' }, { name: 'Joseph Jackson', status: 'red' }] },
+  { name: 'Extended FAST',           acronym: 'eFAST',     patients: [{ name: 'Thomas White', status: 'green' }, { name: 'Jessica Harris', status: 'amber' }, { name: 'Christopher Martin', status: 'green' }] },
+];
+
+const guidelinesRow2: GuidelineBubbleData[] = [
+  { name: 'Blunt Cardiac Injury',       acronym: 'Blunt Cardiac',  patients: [{ name: 'Matthew Thompson', status: 'amber' }, { name: 'Amanda Garcia', status: 'green' }] },
+  { name: 'Blunt Cerebrovascular',      acronym: 'Blunt Cerebro.', patients: [{ name: 'Mark Robinson', status: 'red' }, { name: 'Ashley Clark', status: 'amber' }, { name: 'Donald Lewis', status: 'green' }, { name: 'Stephanie Walker', status: 'red' }] },
+  { name: 'Pregnancy Trauma',           acronym: 'Pregnancy',      patients: [{ name: 'Elizabeth Hall', status: 'amber' }, { name: 'Melissa Allen', status: 'green' }] },
+  { name: 'Spinal Cord Injury',         acronym: 'Spinal Cord',    patients: [{ name: 'Kevin Young', status: 'red' }, { name: 'Nancy Hernandez', status: 'amber' }, { name: 'Steven King', status: 'green' }] },
+  { name: 'Resuscitative Endovascular Balloon Occlusion', acronym: 'REBOA', patients: [{ name: 'George Wright', status: 'amber' }, { name: 'Karen Lopez', status: 'green' }] },
+];
+
+function getWorstStatus(patients: GuidelinePatient[]): FlagStatus {
+  if (patients.some(p => p.status === 'red')) return 'red';
+  if (patients.some(p => p.status === 'amber')) return 'amber';
+  return 'green';
+}
+
+const KNOWN_PATIENT_NAMES = new Set([
+  'John Anderson', 'Maria Garcia', 'David Johnson', 'Sarah Kim', 'Robert Williams',
+]);
+
+// ── Sub-components ─────────────────────────────────────────────────────────────────────────────────
+
 interface PIPatientListProps {
   onPatientSelect: (patient: any, tab?: 'timeline' | 'guidelines') => void;
+}
+
+function GuidelineBubble({ data, onPatientClick }: { data: GuidelineBubbleData; onPatientClick: (name: string) => void }) {
+  const worst = getWorstStatus(data.patients);
+  const borderCls  = worst === 'red' ? 'border-red-200'   : worst === 'amber' ? 'border-amber-200'   : 'border-green-200';
+  const headerCls  = worst === 'red' ? 'bg-red-50 border-red-100' : worst === 'amber' ? 'bg-amber-50 border-amber-100' : 'bg-green-50 border-green-100';
+  const acronymCls = worst === 'red' ? 'text-red-600'     : worst === 'amber' ? 'text-amber-700'     : 'text-green-700';
+  const badgeCls   = worst === 'red' ? 'bg-red-100 text-red-700' : worst === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700';
+  return (
+    <div className={`bg-white rounded-xl border-2 ${borderCls} flex flex-col overflow-hidden`}>
+      <div className={`${headerCls} border-b px-3 py-2.5 flex items-start justify-between gap-2`}>
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className={`text-xs font-bold tracking-wider uppercase leading-tight ${acronymCls}`}>{data.name}</span>
+          <span className={`flex-shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full ${badgeCls}`}>{data.patients.length}</span>
+        </div>
+        <span className="text-base flex-shrink-0 leading-none">{STATUS_ICON[worst]}</span>
+      </div>
+      <div className="flex flex-col divide-y divide-gray-50 flex-1">
+        {data.patients.map((p, i) => {
+          const isKnown = KNOWN_PATIENT_NAMES.has(p.name);
+          return (
+            <div key={i} className="flex items-center justify-between px-3 py-px hover:bg-gray-50 transition-colors">
+              {isKnown ? (
+                <button
+                  onClick={() => onPatientClick(p.name)}
+                  className="text-xs font-bold text-gray-900 truncate leading-snug hover:text-teal-700 transition-colors text-left"
+                >
+                  {p.name}
+                </button>
+              ) : (
+                <span className="text-xs text-gray-500 truncate leading-snug">{p.name}</span>
+              )}
+              <span className="text-xs flex-shrink-0 ml-2">{STATUS_ICON[p.status]}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function SortIcon({ col, sortCol, sortDir }: { col: ColKey; sortCol: ColKey | null; sortDir: SortDir }) {
@@ -152,7 +234,58 @@ export function PIPatientList({ onPatientSelect }: PIPatientListProps) {
     <div className="min-h-screen bg-gray-50">
       <div className="px-6 py-6 flex flex-col gap-6">
 
-        {/* ── Patient Table ────────────────────────────────────────────────────────────── */}
+        {/* ── Reviews row ───────────────────────────────────────────────────── */}
+        <section>
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Reviews</h2>
+          <div className="grid grid-cols-4 gap-4">
+            {reviewCounts.map(r => {
+              const isActive = filters.reviews === r.filterValue;
+              return (
+                <button
+                  key={r.label}
+                  onClick={() => setFilter('reviews', isActive ? '' : r.filterValue)}
+                  className={`rounded-xl border-2 px-4 py-3 flex items-center gap-2 transition-all text-left ${isActive ? r.activeColor : `${r.color} hover:opacity-80`}`}
+                >
+                  <span className="text-2xl font-bold">{r.count}</span>
+                  <span className="text-sm opacity-60">patients pending</span>
+                  <span className="text-sm font-bold ml-auto">{r.label}</span>
+                  {isActive && <span className="text-[10px] ml-1 opacity-60">✕</span>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Tracking rows ────────────────────────────────────────────────────── */}
+        <section>
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Tracking</h2>
+          <div className="grid grid-cols-5 gap-4 mb-4">
+            {guidelinesRow1.map(g => (
+              <GuidelineBubble
+                key={g.acronym}
+                data={g}
+                onPatientClick={name => {
+                  const p = patients.find(pt => pt.name === name);
+                  if (p) onPatientSelect(p);
+                }}
+              />
+            ))}
+          </div>
+          <div className="grid grid-cols-5 gap-4">
+            {guidelinesRow2.map(g => (
+              <GuidelineBubble
+                key={g.acronym}
+                data={g}
+                onPatientClick={name => {
+                  const p = patients.find(pt => pt.name === name);
+                  if (p) onPatientSelect(p);
+                }}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* ── Patient Table ────────────────────────────────────────────────────────────────── */}
         <section className="flex flex-col gap-3">
 
           {/* Bulk action bar */}

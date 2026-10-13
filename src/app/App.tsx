@@ -16,6 +16,7 @@ import { PIDashboard } from './components/PIDashboard';
 import { PIReports } from './components/PIReports';
 import { PIGuidelinesSection } from './components/PIGuidelinesSection';
 import { SectionPlaceholder } from './components/SectionPlaceholder';
+import { HubCommandCenter } from './components/HubCommandCenter';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -74,7 +75,10 @@ export default function App() {
           selectedPatient ? (
             <HubRecordB patient={selectedPatient} onBackToList={handleBackToList} />
           ) : (
-            <PatientList onPatientSelect={handlePatientSelect} />
+            <HubCommandCenter
+              onPatientSelect={handlePatientSelect}
+              onOpenRegistry={() => { setActiveModule('registry'); setRegistrySection('home'); }}
+            />
           )
         ) : activeModule === 'registry' ? (
           registrySection === 'home' || registrySection === 'cases'

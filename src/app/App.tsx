@@ -14,6 +14,7 @@ import { PISubNav, PISection } from './components/PISubNav';
 import { PIPSSection } from './components/PIPSSection';
 import { PIDashboard } from './components/PIDashboard';
 import { PIReports } from './components/PIReports';
+import { PIGuidelinesSection } from './components/PIGuidelinesSection';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -108,10 +109,12 @@ export default function App() {
                     initialView={{ type: 'pips' }}
                   />
                 : <PIPSSection onPatientSelect={handlePatientSelect} />
-              : piSection === 'dashboard'
-                ? <PIDashboard />
-                : piSection === 'reports'
-                  ? <PIReports />
+            : piSection === 'dashboard'
+              ? <PIDashboard />
+              : piSection === 'reports'
+                ? <PIReports />
+                : piSection === 'guidelines'
+                  ? <PIGuidelinesSection />
                   : null
         ) : null}
       </div>

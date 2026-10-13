@@ -1,6 +1,6 @@
-import { Home, ClipboardList, LayoutDashboard, FileText, BookOpen } from 'lucide-react';
+import { Home, ClipboardList, LayoutDashboard, FileText, BookOpen, Settings } from 'lucide-react';
 
-export type PISection = 'home' | 'pips' | 'dashboard' | 'reports' | 'guidelines';
+export type PISection = 'home' | 'pips' | 'dashboard' | 'reports' | 'guidelines' | 'admin';
 
 const PI_TABS = [
   { id: 'home'       as PISection, label: 'Home',       icon: Home            },
@@ -8,6 +8,7 @@ const PI_TABS = [
   { id: 'dashboard'  as PISection, label: 'Dashboard',  icon: LayoutDashboard },
   { id: 'reports'    as PISection, label: 'Reports',    icon: FileText        },
   { id: 'guidelines' as PISection, label: 'Guidelines', icon: BookOpen        },
+  { id: 'admin'      as PISection, label: 'Admin',      icon: Settings        },
 ];
 
 interface PISubNavProps {

@@ -15,6 +15,7 @@ import { PIPSSection } from './components/PIPSSection';
 import { PIDashboard } from './components/PIDashboard';
 import { PIReports } from './components/PIReports';
 import { PIGuidelinesSection } from './components/PIGuidelinesSection';
+import { SectionPlaceholder } from './components/SectionPlaceholder';
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>('hub');
@@ -115,7 +116,7 @@ export default function App() {
                 ? <PIReports />
                 : piSection === 'guidelines'
                   ? <PIGuidelinesSection />
-                  : null
+                  : <SectionPlaceholder module="pi" section={piSection} />
         ) : null}
       </div>
     </div>
